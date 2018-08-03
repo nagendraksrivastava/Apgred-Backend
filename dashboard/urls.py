@@ -9,5 +9,5 @@ urlpatterns = [
     url(r'^resetpwd/$', reset_password),
     url(r'^signup/$', signup_user),
     url(r'^totaluser/$', total_user),
-    url(r'^appuser/', app_users),
+    url(r'^activeuser/', app_users),
 ]
