@@ -64,7 +64,7 @@ class AppUserInfo(models.Model):
     soft_push_cancel_time = models.DateTimeField(null=True, blank=True)
     soft_push_cancel_counter = models.IntegerField(null=True, blank=True, default=0)
     # reason for not updating the current version of the app
-    reason = models.ForeignKey(Reasons, blank=True)
+    reason = models.ForeignKey(Reasons, blank=True, null=True)
     api_call_time = models.DateTimeField(null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
