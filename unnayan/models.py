@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.auth.models import User
+from dashboard.models import Reasons
 
 
 class Client(models.Model):
@@ -24,7 +25,7 @@ class Application(models.Model):
 class AppVersions(models.Model):
     app = models.ForeignKey(Application)
     version_name = models.CharField(max_length=255)
-    version_code = models.IntegerField()
+    version_code = models.IntegerField(unique=True)
     is_production = models.BooleanField()
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
@@ -33,11 +34,13 @@ class AppVersions(models.Model):
 class ApplicationConfig(models.Model):
     app = models.ForeignKey(Application)
     ask_reason = models.BooleanField(default=False)
-    invidual_update = models.BooleanField(default=False)
+    individual_update = models.BooleanField(default=False)
     force_update_soft = models.BooleanField(default=False)
     force_update_hard = models.BooleanField(default=False)
     soft_update_percent = models.IntegerField()
     hard_update_percent = models.IntegerField()
+    soft_update_triggered_time = models.DateTimeField(null=True, blank=True)
+    hard_update_triggered_time = models.DateTimeField(null=True, blank=True)
     dialog_text = models.TextField()
     dialog_title = models.TextField()
     dialog_ok_button = models.CharField(max_length=255, default="Ok")
@@ -59,9 +62,9 @@ class AppUserInfo(models.Model):
     hard_push_ok = models.DateTimeField(null=True, blank=True)
     soft_push_ok = models.DateTimeField(null=True, blank=True)
     soft_push_cancel_time = models.DateTimeField(null=True, blank=True)
-    soft_push_cancel_counter = models.IntegerField(null=True, blank=True,default=0)
+    soft_push_cancel_counter = models.IntegerField(null=True, blank=True, default=0)
     # reason for not updating the current version of the app
-    reason = models.TextField(blank=True)
+    reason = models.ForeignKey(Reasons, blank=True)
     api_call_time = models.DateTimeField(null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)

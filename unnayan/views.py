@@ -280,3 +280,5 @@ def validate_client(request):
     else:
         json_result = {"status": {"code": 300, "message": " Client not registered, Please reach us  "}}
         return HttpResponse(json.dumps(json_result))
+
+

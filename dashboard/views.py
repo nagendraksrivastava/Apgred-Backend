@@ -25,7 +25,7 @@ def total_user(request):
         raise AuthenticationFailed
 
 
-def app_users(request):
+def get_active_user_count(request):
     if request.method != 'GET':
         raise MethodNotAllowed
     token_value = get_authorization_header(request)
@@ -51,9 +51,27 @@ def app_users(request):
 
             }
             return HttpResponse(json.dumps(data))
-
     else:
         raise AuthenticationFailed
+
+
+def last_time_update_triggered(request):
+    if request.method != 'GET':
+        raise MethodNotAllowed
+    token_value = get_authorization_header(request)
+
+
+
+
+def get_app_users(request):
+    if request.method != 'GET':
+        raise MethodNotAllowed
+    token_value = get_authorization_header(request)
+    filter_param = request.GET['users']
+    if Token.objects.get(key=token_value):
+        if filter_param == "all":
+            data = []
+            user_data = AppUserInfo.objects.all
 
 
 def get_daily_active_user():

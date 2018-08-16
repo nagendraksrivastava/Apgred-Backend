@@ -18,3 +18,9 @@ class PotentialCustomer(models.Model):
     interest = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+
+
+class Reasons(models.Model):
+    reason_text = models.CharField(max_length=255)
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
