@@ -28,6 +28,8 @@ def get_all_versions(request):
         version_details = []
         for version in app_versions:
             version_details += [{
+                "app_name": app.app_name,
+                "package_name": app.package_name,
                 "version_name": version.version_name,
                 "version_code": version.version_code,
                 "is_production": version.is_production

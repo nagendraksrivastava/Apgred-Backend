@@ -17,6 +17,7 @@ class Client(models.Model):
 class Application(models.Model):
     client = models.ForeignKey(Client)
     app_token = models.CharField(max_length=255, unique=True)
+    app_name = models.CharField(max_length=255, default="")
     package_name = models.CharField(max_length=255)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
