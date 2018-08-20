@@ -14,6 +14,7 @@ from django.db import IntegrityError
 from dashboard.models import PotentialCustomer
 from rest_framework.exceptions import MethodNotAllowed, NotFound
 from CustomException import EmailAlreadyRegistered, UnknownProblem
+from unnayan.models import Client, Application
 
 
 # Create your views here.
@@ -34,11 +35,14 @@ def login_user(request):
             token = Token.objects.create(user=user)
         except IntegrityError:
             token = Token.objects.get(user=user)
+        client = Client.objects.get(user=user)
+        app_tokens = Application.objects.filter(client=client).values('app_token')
         json_result = {
             "token": token.key,
             "email": user.username,
             "company_name": "name",
-            "img_url": "http://kdbkbckjebrckjbr"
+            "img_url": "http://kdbkbckjebrckjbr",
+            "app_token": list(app_tokens)
         }
         return HttpResponse(json.dumps(json_result))
     else:
