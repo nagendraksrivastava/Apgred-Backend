@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from auth import login_user, logout_user, business_lead, reset_password, signup_user
-from views import total_user, get_active_user_count
+from views import total_user, get_active_user_count, last_time_update_triggered
 from versions import get_all_versions, request_update, add_new_version
 
 urlpatterns = [
@@ -15,4 +15,5 @@ urlpatterns = [
     url(r'^allversion/', get_all_versions),
     url(r'^appupdate/', request_update),
     url(r'^addversion/', add_new_version),
+    url(r'^lasttriggeredupdate/', last_time_update_triggered),
 ]

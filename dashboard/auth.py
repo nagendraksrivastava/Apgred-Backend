@@ -101,10 +101,9 @@ def business_lead(request):
                                                      phone_number=phone_number)
     new_lead.is_active = True
     new_lead.save()
-    json_result = \
-        {
-            "message": "Thank you for contacts we will get back to you shortly "
-        }
+    json_result = {
+        "message": "Thank you for contacts we will get back to you shortly "
+    }
     return HttpResponse(json.dumps(json_result))
 
 

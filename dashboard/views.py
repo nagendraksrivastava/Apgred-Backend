@@ -3,11 +3,14 @@ from __future__ import unicode_literals
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authentication import get_authorization_header
-from unnayan.models import AppUserInfo
+from unnayan.models import AppUserInfo, Application, ApplicationConfig
 from rest_framework.exceptions import MethodNotAllowed, AuthenticationFailed
 from rest_framework.authtoken.models import Token
 from datetime import date, timedelta
 from django.utils import timezone
+from rest_framework.response import Response
+from rest_framework import status
+import time
 from django.db.models import Q
 import json
 
@@ -59,8 +62,29 @@ def last_time_update_triggered(request):
     if request.method != 'GET':
         raise MethodNotAllowed
     token_value = get_authorization_header(request)
-
-
+    app_token = request.GET['app_token']
+    if Token.objects.get(key=token_value):
+        app = Application.objects.get(app_token=app_token)
+        if not app:
+            json_result = {"message": "Invalid app token, please check with your provider"}
+            # log this to our logging system
+            return HttpResponse(json.dumps(json_result))
+        app_config = ApplicationConfig.objects.get(app=app)
+        soft_update_trigger_time = timezone.make_naive(app_config.soft_update_triggered_time,
+                                                       timezone.get_current_timezone())
+        hard_update_trigger_time = timezone.make_naive(app_config.hard_update_triggered_time,
+                                                       timezone.get_current_timezone())
+        json_result = {
+            "hard_update": app_config.force_update_hard,
+            "soft_update": app_config.force_update_soft,
+            "hard_update_percentage": app_config.hard_update_percent,
+            "soft_update_percentage": app_config.soft_update_percent,
+            "soft_update_triggered_time": int(time.mktime(soft_update_trigger_time.timetuple())),
+            "hard_update_triggered_time": int(time.mktime(hard_update_trigger_time.timetuple()))
+        }
+        return Response(json_result, status=status.HTTP_200_OK)
+    else:
+        raise AuthenticationFailed
 
 
 def get_app_users(request):
