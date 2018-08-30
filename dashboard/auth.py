@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authentication import get_authorization_header
@@ -49,6 +48,9 @@ def login_user(request):
         raise NotFound
 
 
+''' This method written to support future signup automation by client '''
+
+
 @csrf_exempt
 def signup_user(request):
     if request.method != 'POST':
@@ -57,7 +59,7 @@ def signup_user(request):
     body = json.loads(body_unicode)
     email = body['email']
     password = body['password']
-    org_name = body['org_name']
+    company_name = body['company_name']
     phone_number = body['phone_number']
     try:
         User.objects.get(username=email)
