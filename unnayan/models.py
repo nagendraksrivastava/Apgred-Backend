@@ -13,6 +13,9 @@ class Client(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
+    def __unicode__(self):
+        return self.user.name
+
 
 class Application(models.Model):
     client = models.ForeignKey(Client)
@@ -21,6 +24,9 @@ class Application(models.Model):
     package_name = models.CharField(max_length=255)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
+
+    def __unicode__(self):
+        return self.app_token
 
 
 class AppVersions(models.Model):
