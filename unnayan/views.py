@@ -26,16 +26,26 @@ def register_device(request):
     pacakge_name = body['package_name']
     version_name = body['version_name']
     version_code = body['version_code']
-    client = Client.objects.get(secret_key=client_secret)
-    if not client:
+
+    try:
+        client = Client.objects.get(secret_key=client_secret)
+    except Client.DoesNotExist:
         json_result = {"status": {"code": 300, "message": " Client not registered "}}
         return HttpResponse(json.dump(json_result))
-    application = Application.objects.get(client=client, app_token=app_token)
-    if not application:
+
+    try:
+        application = Application.objects.get(client=client, app_token=app_token)
+    except Application.DoesNotExist:
         json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
         return HttpResponse(json.dump(json_result))
-    app_user_info = AppUserInfo.objects.get(device_id=advertising_id, app=application)
-    if not app_user_info:
+
+    try:
+        app_user_info = AppUserInfo.objects.get(device_id=advertising_id, app=application)
+        app_user_info.api_call_time = timezone.now()
+        app_user_info.save()
+        json_result = {"status": {"code": 200, "message": "device already registered "}}
+        return HttpResponse(json.dumps(json_result))
+    except AppUserInfo.DoesNotExist:
         app_user_info = AppUserInfo.objects.create(app=application, device_id=advertising_id)
         app_user_info.os = os
         app_user_info.os_version = os_version
@@ -44,11 +54,6 @@ def register_device(request):
         app_user_info.api_call_time = timezone.now()
         app_user_info.save()
         json_result = {"status": {"code": 200, "message": "device registered successfully"}}
-        return HttpResponse(json.dumps(json_result))
-    else:
-        app_user_info.api_call_time = timezone.now()
-        app_user_info.save()
-        json_result = {"status": {"code": 200, "message": "device already registered "}}
         return HttpResponse(json.dumps(json_result))
 
 
@@ -280,5 +285,3 @@ def validate_client(request):
     else:
         json_result = {"status": {"code": 300, "message": " Client not registered, Please reach us  "}}
         return HttpResponse(json.dumps(json_result))
-
-
