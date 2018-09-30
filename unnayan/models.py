@@ -14,7 +14,7 @@ class Client(models.Model):
     modified = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
-        return self.user.name
+        return self.user.username
 
 
 class Application(models.Model):
