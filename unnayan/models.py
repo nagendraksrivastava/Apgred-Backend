@@ -6,6 +6,22 @@ from django.contrib.auth.models import User
 from dashboard.models import Reasons
 
 
+class CompanyProfile(models.Model):
+    user = models.ForeignKey(User)
+    url = models.CharField(max_length=255)
+    company_name = models.CharField(max_length=255)
+    description = models.TextField()
+    logo = models.CharField(max_length=255)
+    address = models.CharField(max_length=255)
+    locality = models.CharField(max_length=255)
+    city = models.CharField(max_length=255)
+    country = models.CharField(max_length=255)
+    pincode = models.IntegerField()
+
+    def __unicode__(self):
+        return self.company_name
+
+
 class Client(models.Model):
     user = models.OneToOneField(User, blank=False, unique=True)
     secret_key = models.CharField(max_length=255, null=False, unique=True)
@@ -22,6 +38,7 @@ class Application(models.Model):
     app_token = models.CharField(max_length=255, unique=True)
     app_name = models.CharField(max_length=255, default="")
     package_name = models.CharField(max_length=255)
+    app_logo = models.CharField(max_length=255)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 

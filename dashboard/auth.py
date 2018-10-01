@@ -11,9 +11,9 @@ import json
 from rest_framework.authtoken.models import Token
 from django.db import IntegrityError
 from dashboard.models import PotentialCustomer
-from rest_framework.exceptions import MethodNotAllowed, NotFound
+from rest_framework.exceptions import MethodNotAllowed, NotFound, AuthenticationFailed
 from CustomException import EmailAlreadyRegistered, UnknownProblem
-from unnayan.models import Client, Application
+from unnayan.models import Client, Application, CompanyProfile
 
 
 # Create your views here.
@@ -34,21 +34,38 @@ def login_user(request):
             token = Token.objects.create(user=user)
         except IntegrityError:
             token = Token.objects.get(user=user)
-        client = Client.objects.get(user=user)
-        app_tokens = Application.objects.filter(client=client).values('app_token')
-        json_result = {
-            "token": token.key,
-            "email": user.username,
-            "company_name": "name",
-            "img_url": "http://kdbkbckjebrckjbr",
-            "app_token": list(app_tokens)
-        }
-        return HttpResponse(json.dumps(json_result))
+        try:
+            client = Client.objects.get(user=user)
+        except Client.DoesNotExist:
+            json_result = {"status": {"code": 300, "message": "Client not registered"}}
+            return HttpResponse(json.dump(json_result))
+
+        app = Application.objects.filter(client=client)
+        try:
+            company_profile = CompanyProfile.objects.get(user=user)
+        except CompanyProfile.DoesNotExist:
+            print 'company profile is not created for ' + str(user.username)
+        json_result = []
+        if app:
+            for appobj in app:
+                json_result += [{
+                    "token": token,
+                    "email": appobj.user.username,
+                    "company_name": company_profile.company_name,
+                    "app_logo": appobj.app_logo,
+                    "company_logo": company_profile.logo,
+                    "app_token": appobj.app_token
+
+                }]
+            return HttpResponse(json.dumps(json_result))
+        else:
+            json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
+            return HttpResponse(json.dumps(json_result))
     else:
         raise NotFound
 
 
-''' This method written to support future signup automation by client '''
+''' This method written to support future signup automation for client '''
 
 
 @csrf_exempt
@@ -95,14 +112,14 @@ def business_lead(request):
     try:
         PotentialCustomer.objects.get(email=email)
         raise EmailAlreadyRegistered
-    except User.DoesNotExist:
+    except PotentialCustomer.DoesNotExist:
         print('User signup for the first time')
     new_lead = PotentialCustomer.objects.create_user(first_name=email, last_name=password, company_name=company_name,
                                                      phone_number=phone_number)
     new_lead.is_active = True
     new_lead.save()
     json_result = {
-        "message": "Thank you for contacts we will get back to you shortly "
+        "message": "Thank you for contacting us we will get back to you shortly "
     }
     return HttpResponse(json.dumps(json_result))
 
@@ -113,10 +130,13 @@ def logout_user(request):
         raise MethodNotAllowed
     logout(request)
     token_value = get_authorization_header(request)
-    token = Token.objects.get(key=token_value)
-    token.delete()
-    json_result = {"message": "User logged out successfully"}
-    return HttpResponse(json.dumps(json_result))
+    try:
+        token = Token.objects.get(key=token_value)
+        token.delete()
+        json_result = {"message": "User logged out successfully"}
+        return HttpResponse(json.dumps(json_result))
+    except Token.DoesNotExist:
+        raise AuthenticationFailed
 
 
 @csrf_exempt

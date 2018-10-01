@@ -20,11 +20,12 @@ def total_user(request):
     if request.method != 'GET':
         raise MethodNotAllowed
     token_value = get_authorization_header(request)
-    if Token.objects.get(key=token_value):
+    try:
+        token = Token.objects.get(key=token_value)
         total_user_count = AppUserInfo.objects.all().count()
         data = {'total_user': total_user_count}
         return HttpResponse(json.dumps(data))
-    else:
+    except Token.DoesNotExist:
         raise AuthenticationFailed
 
 
@@ -33,7 +34,8 @@ def get_active_user_count(request):
         raise MethodNotAllowed
     token_value = get_authorization_header(request)
     filter_param = request.GET['active']
-    if Token.objects.get(key=token_value):
+    try:
+        token = Token.objects.get(key=token_value)
         if filter_param == 'daily':
             # daily_active_user_count = AppUserInfo.objects.filter(Q(modified=date.today()) | Q(created=date.today()))
             data = {"daily_active_user": get_daily_active_user()}
@@ -54,7 +56,7 @@ def get_active_user_count(request):
 
             }
             return HttpResponse(json.dumps(data))
-    else:
+    except Token.DoesNotExist:
         raise AuthenticationFailed
 
 
@@ -63,12 +65,13 @@ def last_time_update_triggered(request):
         raise MethodNotAllowed
     token_value = get_authorization_header(request)
     app_token = request.GET['app_token']
-    if Token.objects.get(key=token_value):
+
+    try:
+        token = Token.objects.get(key=token_value)
+    except Token.DoesNotExist:
+        raise AuthenticationFailed
+    try:
         app = Application.objects.get(app_token=app_token)
-        if not app:
-            json_result = {"message": "Invalid app token, please check with your provider"}
-            # log this to our logging system
-            return HttpResponse(json.dumps(json_result))
         app_config = ApplicationConfig.objects.get(app=app)
         soft_update_trigger_time = timezone.make_naive(app_config.soft_update_triggered_time,
                                                        timezone.get_current_timezone())
@@ -83,8 +86,9 @@ def last_time_update_triggered(request):
             "hard_update_triggered_time": int(time.mktime(hard_update_trigger_time.timetuple()))
         }
         return Response(json_result, status=status.HTTP_200_OK)
-    else:
-        raise AuthenticationFailed
+    except Application.DoesNotExist:
+        json_result = {"message": "Invalid app token, please check with your provider"}
+        return HttpResponse(json.dumps(json_result))
 
 
 def get_app_users(request):

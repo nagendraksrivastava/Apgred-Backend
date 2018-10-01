@@ -18,12 +18,12 @@ def get_all_versions(request):
         raise MethodNotAllowed
     token_value = get_authorization_header(request)
     app_token = request.GET['app_token']
-    if Token.objects.get(key=token_value):
+    try:
+        token = Token.objects.get(key=token_value)
+    except Token.DoesNotExist:
+        raise AuthenticationFailed
+    try:
         app = Application.objects.get(app_token=app_token)
-        if not app:
-            json_result = {"message": "Invalid app token, please check with your provider"}
-            # log this to our logging system
-            return HttpResponse(json.dumps(json_result))
         app_versions = AppVersions.objects.filter(app=app)
         version_details = []
         for version in app_versions:
@@ -36,8 +36,9 @@ def get_all_versions(request):
             }]
         json_versions = {"version_details": version_details}
         return HttpResponse(json.dumps(json_versions))
-    else:
-        raise AuthenticationFailed
+    except Application.DoesNotExist:
+        json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
+        return HttpResponse(json.dumps(json_result))
 
 
 def request_update(request):
@@ -50,12 +51,13 @@ def request_update(request):
     update_percentage = body['percentage']
     individual_update = body['individual_update']
     app_token = body['app_token']
-    if Token.objects.get(key=token_value):
+    try:
+        token = Token.objects.get(key=token_value)
+    except Token.DoesNotExist:
+        raise AuthenticationFailed
+
+    try:
         app = Application.objects.get(app_token=app_token)
-        if not app:
-            json_result = {"message": "Invalid app token, please check with your provider"}
-            # log this to our logging system
-            return Response(json_result, status=status.HTTP_404_NOT_FOUND)
         app_config = ApplicationConfig.objects.get(app=app)
         app_config.individual_update = individual_update
 
@@ -75,9 +77,9 @@ def request_update(request):
         app_config.save()
         json_result = {"message": "success"}
         return Response(json_result, status=status.HTTP_200_OK)
-    else:
-        json_result = {"message": " Authentication Failure"}
-        return Response(json_result, status=status.HTTP_401_UNAUTHORIZED)
+    except Application.DoesNotExist:
+        json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
+        return HttpResponse(json.dumps(json_result))
 
 
 # With every request we have to see client is banned or not for that decorators can be used
@@ -91,12 +93,12 @@ def add_new_version(request):
     version_name = body['version_name']
     version_code = body['version_code']
     is_prod = body['is_production']
-    if Token.objects.get(key=token_value):
+    try:
+        token = Token.objects.get(key=token_value)
+    except Token.DoesNotExist:
+        raise AuthenticationFailed
+    try:
         app = Application.objects.get(app_token=app_token)
-        if not app:
-            json_result = {"message": "Invalid app token, please check with your provider"}
-            # log this to our logging system
-            return Response(json_result, status=status.HTTP_404_NOT_FOUND)
         app_versions = AppVersions.objects.filter(app=app)
         for version in app_versions:
             if version.version_code < version_code:
@@ -111,6 +113,6 @@ def add_new_version(request):
         app_versions.save()
         json_result = {"message": "Version added successfully"}
         return Response(json_result, status=status.HTTP_200_OK)
-    else:
-        json_result = {"message": " Authentication Failure"}
-        return Response(json_result, status=status.HTTP_401_UNAUTHORIZED)
+    except Application.DoesNotExist:
+        json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
+        return HttpResponse(json.dumps(json_result))
