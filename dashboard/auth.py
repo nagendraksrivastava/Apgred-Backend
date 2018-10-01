@@ -50,7 +50,7 @@ def login_user(request):
             for appobj in app:
                 json_result += [{
                     "token": token,
-                    "email": appobj.user.username,
+                    "email": user.username,
                     "company_name": company_profile.company_name,
                     "app_logo": appobj.app_logo,
                     "company_logo": company_profile.logo,
