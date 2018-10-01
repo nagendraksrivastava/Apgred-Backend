@@ -73,33 +73,35 @@ def get_forceupdate(request):
     version_name = body['version_name']
     version_code = body['version_code']
 
-    client = Client.objects.get(secret_key=client_secret)
-    if not client:
+    try:
+        client = Client.objects.get(secret_key=client_secret)
+    except Client.DoesNotExist:
         json_result = {"status": {"code": 300, "message": "Client not registered"}}
         return HttpResponse(json.dump(json_result))
-
-    application = Application.objects.get(client=client, app_token=app_token)
-
-    if not application:
+    try:
+        application = Application.objects.get(client=client, app_token=app_token)
+    except Application.DoesNotExist:
         json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
         return HttpResponse(json.dump(json_result))
+
     try:
         app_config = ApplicationConfig.objects.get(app=application)
-    except ObjectDoesNotExist:
-        json_result = {"status": {"code": 600, "message": "Application in not configured "}}
-        return HttpResponse(json.dumps(json_result))
+        play_store_url = app_config.play_store_url
+        dialog_title = app_config.dialog_title
+        dialog_text = app_config.dialog_text
+        dialog_ok_button_text = app_config.dialog_ok_button
+        dialog_cancel_button_text = app_config.dialog_cancel_button
 
-    play_store_url = app_config.play_store_url
-    dialog_title = app_config.dialog_title
-    dialog_text = app_config.dialog_text
-    dialog_ok_button_text = app_config.dialog_ok_button
-    dialog_cancel_button_text = app_config.dialog_cancel_button
+    except ApplicationConfig.DoesNotExist:
+        json_result = {"status": {"code": 600, "message": "Application is not configured "}}
+        return HttpResponse(json.dumps(json_result))
 
     # TODO for now it is get but later it could be filter
     try:
         app_versions = AppVersions.objects.get(app=application, is_production=True)
-    except ObjectDoesNotExist:
-        json_result = {"status": {"code": 601, "message": " Versions of application not configured  "}}
+    except AppVersions.DoesNotExist:
+        json_result = {"status": {"code": 601, "message": "Versions of application not configured please configure "
+                                                          "from dashboard  "}}
         return HttpResponse(json.dumps(json_result))
 
     if app_versions.version_code == version_code:
@@ -174,26 +176,26 @@ def soft_update_cancel(request):
     client_secret = body['client_secret']
     app_token = body['app_token']
     advertising_id = body['advertising_id']
-    client = Client.objects.get(secret_key=client_secret)
-    if not client:
+    try:
+        client = Client.objects.get(secret_key=client_secret)
+    except Client.DoesNotExist:
         json_result = {"status": {"code": 300, "message": "Client not registered"}}
         return HttpResponse(json.dump(json_result))
 
-    application = Application.objects.get(client=client, app_token=app_token)
-
-    if not application:
+    try:
+        application = Application.objects.get(client=client, app_token=app_token)
+    except Application.DoesNotExist:
         json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
         return HttpResponse(json.dump(json_result))
-
-    app_user_info = AppUserInfo.objects.get(app=application, device_id=advertising_id)
-    if app_user_info:
+    try:
+        app_user_info = AppUserInfo.objects.get(app=application, device_id=advertising_id)
         app_user_info.soft_push_cancel_time = timezone.now()
         # soft_push_cancel_counter = app_user_info.soft_push_cancel_counter
         app_user_info.soft_push_cancel_counter = F('soft_push_cancel_counter') + 1
         app_user_info.save()
         json_result = {"status": {"code": 200, "message": " Success "}}
         return HttpResponse(json.dumps(json_result))
-    else:
+    except AppUserInfo.DoesNotExist:
         json_result = {"status": {"code": 300, "message": " Device not registered with us "}}
         return HttpResponse(json.dumps(json_result))
 
@@ -208,25 +210,23 @@ def soft_push_ok_click(request):
     client_secret = body['client_secret']
     app_token = body['app_token']
     advertising_id = body['advertising_id']
-
-    client = Client.objects.get(secret_key=client_secret)
-    if not client:
+    try:
+        client = Client.objects.get(secret_key=client_secret)
+    except Client.DoesNotExist:
         json_result = {"status": {"code": 300, "message": "Client not registered"}}
         return HttpResponse(json.dump(json_result))
-
-    application = Application.objects.get(client=client, app_token=app_token)
-
-    if not application:
+    try:
+        application = Application.objects.get(client=client, app_token=app_token)
+    except Application.DoesNotExist:
         json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
         return HttpResponse(json.dump(json_result))
-
-    app_user_info = AppUserInfo.objects.get(app=application, device_id=advertising_id)
-    if app_user_info:
+    try:
+        app_user_info = AppUserInfo.objects.get(app=application, device_id=advertising_id)
         app_user_info.soft_push_ok = timezone.now()
         app_user_info.save()
         json_result = {"status": {"code": 200, "message": " Success "}}
         return HttpResponse(json.dumps(json_result))
-    else:
+    except AppUserInfo.DoesNotExist:
         json_result = {"status": {"code": 300, "message": " Device not registered with us "}}
         return HttpResponse(json.dumps(json_result))
 
@@ -242,24 +242,24 @@ def hard_push_ok_click(request):
     app_token = body['app_token']
     device_id = body['advertising_id']
 
-    client = Client.objects.get(secret_key=client_secret)
-    if not client:
+    try:
+        client = Client.objects.get(secret_key=client_secret)
+    except Client.DoesNotExist:
         json_result = {"status": {"code": 300, "message": "Client not registered"}}
         return HttpResponse(json.dump(json_result))
 
-    application = Application.objects.get(client=client, app_token=app_token)
-
-    if not application:
+    try:
+        application = Application.objects.get(client=client, app_token=app_token)
+    except Application.DoesNotExist:
         json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
         return HttpResponse(json.dump(json_result))
-
-    app_user_info = AppUserInfo.objects.get(app=application, device_id=device_id)
-    if app_user_info:
+    try:
+        app_user_info = AppUserInfo.objects.get(app=application, device_id=device_id)
         app_user_info.hard_push_ok = timezone.now()
         app_user_info.save()
         json_result = {"status": {"code": 200, "message": " Success "}}
         return HttpResponse(json.dumps(json_result))
-    else:
+    except AppUserInfo.DoesNotExist:
         json_result = {"status": {"code": 300, "message": " Device not registered with us "}}
         return HttpResponse(json.dumps(json_result))
 
@@ -273,15 +273,15 @@ def validate_client(request):
     body = json.loads(body_unicode)
     app_token = body['app_token']
     client_secret = body['client_secret']
-    client = Client.objects.get(secret_key=client_secret)
-    if client:
-        app = Application.objects.get(app_token=app_token)
-        if app:
-            json_result = {"status": {"code": 200, "message": " Client validated "}}
-            return HttpResponse(json.dumps(json_result))
-        else:
-            json_result = {"status": {"code": 301, "message": " Client registered but app is not registered  "}}
-            return HttpResponse(json.dumps(json_result))
-    else:
-        json_result = {"status": {"code": 300, "message": " Client not registered, Please reach us  "}}
+    try:
+        client = Client.objects.get(secret_key=client_secret)
+    except Client.DoesNotExist:
+        json_result = {"status": {"code": 300, "message": " Client not registered, Please reach out to us  "}}
+        return HttpResponse(json.dumps(json_result))
+    try:
+        app = Application.objects.get(app_token=app_token, client=client)
+        json_result = {"status": {"code": 200, "message": " Client validated "}, "app_name": app.app_name}
+        return HttpResponse(json.dumps(json_result))
+    except Application.DoesNotExist:
+        json_result = {"status": {"code": 301, "message": " Client registered but app is not registered  "}}
         return HttpResponse(json.dumps(json_result))
