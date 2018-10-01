@@ -38,7 +38,7 @@ class Application(models.Model):
     app_token = models.CharField(max_length=255, unique=True)
     app_name = models.CharField(max_length=255, default="")
     package_name = models.CharField(max_length=255)
-    app_logo = models.CharField(max_length=255)
+    app_logo = models.CharField(max_length=255, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
