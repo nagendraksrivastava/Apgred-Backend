@@ -24,7 +24,7 @@ SECRET_KEY = 'm1#=87q_jp95ix3wz0a@-deim6+4#tj3ci&a5$3cmwk$uh89f7'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['35.198.235.7']
 
 # Application definition
 
@@ -78,12 +78,23 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'apgred',
-        'USER': 'root',
-        'PASSWORD': '',
+        'USER': 'django',
+        'PASSWORD': 'nagendra',
         'HOST': 'localhost',
         'PORT': '',
     }
 }
+
+
+REST_FRAMEWORK = {
+            'DEFAULT_AUTHENTICATION_CLASSES': (
+                        'rest_framework.authentication.TokenAuthentication',
+                            ),
+                'DEFAULT_PERMISSION_CLASSES': (
+                            'rest_framework.permissions.IsAuthenticated',
+                                )
+        }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -120,3 +131,4 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
