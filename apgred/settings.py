@@ -24,8 +24,8 @@ SECRET_KEY = 'm1#=87q_jp95ix3wz0a@-deim6+4#tj3ci&a5$3cmwk$uh89f7'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# ALLOWED_HOSTS = ['35.198.235.7']
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['35.198.235.7']
+# ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -79,10 +79,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'apgred',
-        # 'USER': 'django',
-        # 'PASSWORD': 'nagendra',
-        'USER': 'root',
-        'PASSWORD': '',
+        'USER': 'django',
+        'PASSWORD': 'nagendra',
+        # 'USER': 'root',
+        # 'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '',
     }
