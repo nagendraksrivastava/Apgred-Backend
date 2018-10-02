@@ -40,16 +40,18 @@ def login_user(request):
             json_result = {"status": {"code": 300, "message": "Client not registered"}}
             return HttpResponse(json.dump(json_result))
 
-        app = Application.objects.filter(client=client)
         try:
             company_profile = CompanyProfile.objects.get(user=user)
         except CompanyProfile.DoesNotExist:
             print 'company profile is not created for ' + str(user.username)
+
+        app = Application.objects.filter(client=client)
+
         json_result = []
         if app:
             for appobj in app:
                 json_result += [{
-                    "token": token,
+                    "token": token.key,
                     "email": user.username,
                     "company_name": company_profile.company_name,
                     "app_logo": appobj.app_logo,
