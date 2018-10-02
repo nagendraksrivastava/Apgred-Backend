@@ -19,6 +19,9 @@ class PotentialCustomer(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
+    def __unicode__(self):
+        return self.company_name
+
 
 class Reasons(models.Model):
     reason_text = models.CharField(max_length=255)

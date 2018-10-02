@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('ask_reason', models.BooleanField(default=False)),
-                ('invidual_update', models.BooleanField(default=False)),
+                ('individual_update', models.BooleanField(default=False)),
                 ('force_update_soft', models.BooleanField(default=False)),
                 ('force_update_hard', models.BooleanField(default=False)),
                 ('soft_update_percent', models.IntegerField()),

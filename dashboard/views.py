@@ -72,6 +72,11 @@ def last_time_update_triggered(request):
         raise AuthenticationFailed
     try:
         app = Application.objects.get(app_token=app_token)
+    except Application.DoesNotExist:
+        json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
+        return HttpResponse(json.dump(json_result))
+
+    try:
         app_config = ApplicationConfig.objects.get(app=app)
         soft_update_trigger_time = timezone.make_naive(app_config.soft_update_triggered_time,
                                                        timezone.get_current_timezone())
@@ -86,8 +91,8 @@ def last_time_update_triggered(request):
             "hard_update_triggered_time": int(time.mktime(hard_update_trigger_time.timetuple()))
         }
         return Response(json_result, status=status.HTTP_200_OK)
-    except Application.DoesNotExist:
-        json_result = {"message": "Invalid app token, please check with your provider"}
+    except ApplicationConfig.DoesNotExist:
+        json_result = {"status": {"code": 302, "message": " Please configure application details "}}
         return HttpResponse(json.dumps(json_result))
 
 

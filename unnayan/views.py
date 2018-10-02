@@ -111,7 +111,7 @@ def get_forceupdate(request):
 
         return HttpResponse(json.dumps(json_result))
     if app_config.force_update_soft:
-        if app_config.invidual_update:
+        if app_config.individual_update:
             # This arrangement for individual device user update
             ind_app_user_info = AppUserInfo.objects.get(app=application, device_id=advertising_id)
             if ind_app_user_info.single_update:
@@ -140,7 +140,7 @@ def get_forceupdate(request):
             # Case 1 - the percentage is in numbers
             # case 2  company wants an individual update
     if app_config.force_update_hard:
-        if app_config.invidual_update:
+        if app_config.individual_update:
             ind_app_user_info = AppUserInfo.objects.get(app=application, device_id=advertising_id)
             if ind_app_user_info.single_update:
                 json_result = {"status": {"code": 200, "message": " Success "},

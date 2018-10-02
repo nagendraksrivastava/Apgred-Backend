@@ -74,6 +74,9 @@ class ApplicationConfig(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
+    def __unicode__(self):
+        return self.app.app_token
+
 
 class AppUserInfo(models.Model):
     app = models.ForeignKey(Application)

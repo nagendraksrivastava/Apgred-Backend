@@ -38,12 +38,13 @@ def login_user(request):
             client = Client.objects.get(user=user)
         except Client.DoesNotExist:
             json_result = {"status": {"code": 300, "message": "Client not registered"}}
-            return HttpResponse(json.dump(json_result))
+            return HttpResponse(json.dumps(json_result))
 
         try:
             company_profile = CompanyProfile.objects.get(user=user)
         except CompanyProfile.DoesNotExist:
-            print 'company profile is not created for ' + str(user.username)
+            json_result = {"status": {"code": 355, "message": "Company profile not created"}}
+            return HttpResponse(json.dumps(json_result))
 
         app = Application.objects.filter(client=client)
 
@@ -115,13 +116,13 @@ def business_lead(request):
         PotentialCustomer.objects.get(email=email)
         raise EmailAlreadyRegistered
     except PotentialCustomer.DoesNotExist:
-        print('User signup for the first time')
-    new_lead = PotentialCustomer.objects.create_user(first_name=email, last_name=password, company_name=company_name,
-                                                     phone_number=phone_number)
+        print("User signup for the first time")
+    new_lead = PotentialCustomer.objects.create(first_name=email, last_name=password, company_name=company_name,
+                                                phone_number=phone_number)
     new_lead.is_active = True
     new_lead.save()
     json_result = {
-        "message": "Thank you for contacting us we will get back to you shortly "
+        "message": "Thank you for contacting us we will get back to you shortly"
     }
     return HttpResponse(json.dumps(json_result))
 
@@ -148,10 +149,10 @@ def reset_password(request):
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     email = body['email']
-    if User.objects.filter(username=email.exists()):
+    if User.objects.filter(username=email).exists():
         json_result = {
             "message": "Reset password email sent, please check your mail"}
         return HttpResponse(json.dumps(json_result))
     else:
-        json_result = {"message": "email not registered with us "}
+        json_result = {"message": "email not registered with us please reach out to us"}
         return HttpResponse(json.dumps(json_result))

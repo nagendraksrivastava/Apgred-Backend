@@ -7,17 +7,11 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('unnayan', '0004_auto_20180617_1029'),
     ]
 
     operations = [
-        migrations.RenameField(
-            model_name='applicationconfig',
-            old_name='invidual_update',
-            new_name='individual_update',
-        ),
         migrations.AddField(
             model_name='applicationconfig',
             name='hard_update_triggered_time',
