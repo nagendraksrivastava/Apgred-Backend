@@ -15,6 +15,7 @@ from django.db.models import Q
 import json
 
 
+#TODO add app token based filteration 
 @csrf_exempt
 def total_user(request):
     if request.method != 'GET':
