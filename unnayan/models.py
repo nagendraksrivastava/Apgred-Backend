@@ -39,6 +39,7 @@ class Application(models.Model):
     app_name = models.CharField(max_length=255, default="")
     package_name = models.CharField(max_length=255)
     app_logo = models.CharField(max_length=255, null=True, blank=True)
+    play_store_url = models.TextField(null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
@@ -56,13 +57,13 @@ class AppVersions(models.Model):
 
 
 class ApplicationConfig(models.Model):
-    app = models.ForeignKey(Application)
+    app_version = models.ForeignKey(AppVersions)
     ask_reason = models.BooleanField(default=False)
     individual_update = models.BooleanField(default=False)
     force_update_soft = models.BooleanField(default=False)
     force_update_hard = models.BooleanField(default=False)
-    soft_update_percent = models.IntegerField()
-    hard_update_percent = models.IntegerField()
+    soft_update_percent = models.IntegerField(default=100)
+    hard_update_percent = models.IntegerField(default=100)
     soft_update_triggered_time = models.DateTimeField(null=True, blank=True)
     hard_update_triggered_time = models.DateTimeField(null=True, blank=True)
     dialog_text = models.TextField()

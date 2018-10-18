@@ -52,6 +52,10 @@ def request_update(request):
     update_type = body['update_type']
     update_percentage = body['percentage']
     individual_update = body['individual_update']
+    dialog_title = body['title']
+    dialog_message = body['message']
+    positive_button_text = body['positive_button_text']
+    negative_button_text = body['negative_button_text']
     app_token = body['app_token']
     try:
         token = Token.objects.get(key=token_value)
@@ -64,14 +68,25 @@ def request_update(request):
         json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
         return HttpResponse(json.dumps(json_result))
     try:
-        app_config = ApplicationConfig.objects.get(app=app)
+        app_versions = AppVersions.objects.get(app=app)
+    except AppVersions.DoesNotExist:
+        json_result = {"status": {"code": 303, "message": " Please add version details "}}
+        return HttpResponse(json.dumps(json_result))
+
+    try:
+        app_config = ApplicationConfig.objects.get(app=app_versions)
         app_config.individual_update = individual_update
+        app_config.dialog_title = dialog_title
+        app_config.dialog_text = dialog_message
+        app_config.dialog_ok_button = positive_button_text
+        app_config.dialog_cancel_button = negative_button_text
 
         if update_type == 'soft':
             app_config.force_update_soft = True
             app_config.force_update_hard = False
             app_config.soft_update_triggered_time = datetime.datetime.now()
             app_config.soft_update_percent = update_percentage
+            
         elif update_type == 'hard':
             app_config.force_update_hard = True
             app_config.force_update_soft = False
