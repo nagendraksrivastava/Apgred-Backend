@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from auth import login_user, logout_user, business_lead, reset_password, signup_user
 from views import total_user, get_active_user_count, last_time_update_triggered
-from versions import get_all_versions, request_update, add_new_version
+from versions import get_all_versions, request_update, add_new_version, enable_disable_version, enable_disable_prod
 
 urlpatterns = [
     url(r'^login/$', login_user),
@@ -15,5 +15,7 @@ urlpatterns = [
     url(r'^allversion/', get_all_versions),
     url(r'^appupdate/', request_update),
     url(r'^addversion/', add_new_version),
+    url(r'^enabledisableversion/', enable_disable_version),
+    url(r'^enabledisableprod/', enable_disable_prod),
     url(r'^lasttriggeredupdate/', last_time_update_triggered),
 ]

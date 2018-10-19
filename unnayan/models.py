@@ -50,8 +50,9 @@ class Application(models.Model):
 class AppVersions(models.Model):
     app = models.ForeignKey(Application)
     version_name = models.CharField(max_length=255)
-    version_code = models.IntegerField(unique=True)
+    version_code = models.IntegerField()
     is_production = models.BooleanField()
+    is_enabled = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
