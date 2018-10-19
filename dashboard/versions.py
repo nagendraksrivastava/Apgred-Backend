@@ -53,6 +53,8 @@ def request_update(request):
     update_type = body['update_type']
     update_percentage = body['percentage']
     individual_update = body['individual_update']
+    version_name = body['version_name']
+    version_code = body['version_code']
     dialog_title = body['title']
     dialog_message = body['message']
     positive_button_text = body['positive_button_text']
@@ -69,13 +71,13 @@ def request_update(request):
         json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
         return HttpResponse(json.dumps(json_result))
     try:
-        app_versions = AppVersions.objects.get(app=app)
+        app_version = AppVersions.objects.get(app=app, version_name=version_name, version_code=version_code)
     except AppVersions.DoesNotExist:
         json_result = {"status": {"code": 303, "message": " Please add version details "}}
         return HttpResponse(json.dumps(json_result))
 
     try:
-        app_config = ApplicationConfig.objects.get(app=app_versions)
+        app_config = ApplicationConfig.objects.get(app=app_version)
         app_config.individual_update = individual_update
         app_config.dialog_title = dialog_title
         app_config.dialog_text = dialog_message
@@ -212,6 +214,3 @@ def enable_disable_prod(request):
     except AppVersions.DoesNotExist:
         json_result = {"status": {"code": 304, "message": " Version does not exist "}}
         return HttpResponse(json.dumps(json_result))
-
-
-
