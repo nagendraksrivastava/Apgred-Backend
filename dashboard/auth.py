@@ -109,17 +109,13 @@ def business_lead(request):
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     email = body['email']
-    password = body['password']
-    company_name = body['company_name']
     phone_number = body['phone_number']
     try:
         PotentialCustomer.objects.get(email=email)
         raise EmailAlreadyRegistered
     except PotentialCustomer.DoesNotExist:
         print("User signup for the first time")
-    new_lead = PotentialCustomer.objects.create(first_name=email, last_name=password, company_name=company_name,
-                                                phone_number=phone_number)
-    new_lead.is_active = True
+    new_lead = PotentialCustomer.objects.create(email=email, phone_number=phone_number)
     new_lead.save()
     json_result = {
         "message": "Thank you for contacting us we will get back to you shortly"

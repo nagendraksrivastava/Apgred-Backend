@@ -154,7 +154,6 @@ def enable_disable_version(request):
     app_token = body['app_token']
     version_name = body['version_name']
     version_code = body['version_code']
-    is_prod = body['is_production']
     is_enable = body['is_enable']
     try:
         token = Token.objects.get(key=token_value)

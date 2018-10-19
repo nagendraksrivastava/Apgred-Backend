@@ -25,7 +25,7 @@ class CompanyProfile(models.Model):
 class Client(models.Model):
     user = models.OneToOneField(User, blank=False, unique=True)
     secret_key = models.CharField(max_length=255, null=False, unique=True)
-    banned = models.IntegerField(default=False)
+    banned = models.IntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
