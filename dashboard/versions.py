@@ -76,7 +76,7 @@ def request_update(request):
         json_result = {"status": {"code": 303, "message": " Please add version details "}}
         return HttpResponse(json.dumps(json_result))
 
-    app_config = ApplicationConfig.objects.get_or_create(app=app_version)
+    app_config = ApplicationConfig.objects.get_or_create(app_version=app_version)
     app_config.individual_update = individual_update
     app_config.dialog_title = dialog_title
     app_config.dialog_text = dialog_message
