@@ -18,4 +18,5 @@ urlpatterns = [
     url(r'^enabledisableversion/', enable_disable_version),
     url(r'^enabledisableprod/', enable_disable_prod),
     url(r'^lasttriggeredupdate/', last_time_update_triggered),
+    url(r'^profile/', last_time_update_triggered),
 ]

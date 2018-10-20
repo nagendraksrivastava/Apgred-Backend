@@ -7,16 +7,16 @@ from dashboard.models import Reasons
 
 
 class CompanyProfile(models.Model):
-    user = models.ForeignKey(User)
-    url = models.CharField(max_length=255)
-    company_name = models.CharField(max_length=255)
+    user = models.OneToOneField(User, blank=False, unique=True)
+    url = models.CharField(max_length=255, null=True, blank=True)
+    company_name = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField()
-    logo = models.CharField(max_length=255)
-    address = models.CharField(max_length=255)
-    locality = models.CharField(max_length=255)
-    city = models.CharField(max_length=255)
+    logo = models.CharField(max_length=255, null=True, blank=True)
+    address = models.CharField(max_length=255, null=True, blank=True)
+    locality = models.CharField(max_length=255, null=True, blank=True)
+    city = models.CharField(max_length=255, null=True, blank=True)
     country = models.CharField(max_length=255)
-    pincode = models.IntegerField()
+    pincode = models.IntegerField(null=True, blank=True)
 
     def __unicode__(self):
         return self.company_name
@@ -56,6 +56,9 @@ class AppVersions(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
+    def __unicode__(self):
+        return self.version_name
+
 
 class ApplicationConfig(models.Model):
     app_version = models.ForeignKey(AppVersions)
@@ -77,7 +80,7 @@ class ApplicationConfig(models.Model):
     modified = models.DateTimeField(auto_now=True)
 
     def __unicode__(self):
-        return self.app.app_token
+        return self.app_version.version_name
 
 
 class AppUserInfo(models.Model):

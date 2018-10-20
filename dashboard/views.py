@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authentication import get_authorization_header
-from unnayan.models import AppUserInfo, Application, ApplicationConfig
+from unnayan.models import AppUserInfo, Application, ApplicationConfig, CompanyProfile
 from rest_framework.exceptions import MethodNotAllowed, AuthenticationFailed
 from rest_framework.authtoken.models import Token
 from datetime import date, timedelta
@@ -15,7 +15,7 @@ from django.db.models import Q
 import json
 
 
-#TODO add app token based filteration 
+# TODO add app token based filteration and version based filteration
 @csrf_exempt
 def total_user(request):
     if request.method != 'GET':
@@ -94,6 +94,36 @@ def last_time_update_triggered(request):
         return Response(json_result, status=status.HTTP_200_OK)
     except ApplicationConfig.DoesNotExist:
         json_result = {"status": {"code": 302, "message": " Please configure application details "}}
+        return HttpResponse(json.dumps(json_result))
+
+
+def get_company_profile(request):
+    if request.method != 'GET':
+        raise MethodNotAllowed
+    token_value = get_authorization_header(request)
+    try:
+        token = Token.objects.get(key=token_value)
+    except Token.DoesNotExist:
+        raise AuthenticationFailed
+    user = token.user
+    try:
+        company_profile = CompanyProfile.objects.get(user=user)
+        json_result = {
+            "company_name": company_profile.company_name,
+            "description": company_profile.description,
+            "logo_url": company_profile.logo,
+            "company_url": company_profile.url,
+            "address": company_profile.address,
+            "locality": company_profile.locality,
+            "city": company_profile.city,
+            "country": company_profile.country,
+            "pincode": company_profile.pincode
+
+        }
+        return HttpResponse(json.dumps(json_result))
+    except CompanyProfile.DoesNotExist:
+        json_result = {
+            "status": {"code": 100, "message": " Company profile is not configured , please reach out to us "}}
         return HttpResponse(json.dumps(json_result))
 
 

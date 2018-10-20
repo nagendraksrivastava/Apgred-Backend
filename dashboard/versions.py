@@ -76,34 +76,30 @@ def request_update(request):
         json_result = {"status": {"code": 303, "message": " Please add version details "}}
         return HttpResponse(json.dumps(json_result))
 
-    try:
-        app_config = ApplicationConfig.objects.get(app=app_version)
-        app_config.individual_update = individual_update
-        app_config.dialog_title = dialog_title
-        app_config.dialog_text = dialog_message
-        app_config.dialog_ok_button = positive_button_text
-        app_config.dialog_cancel_button = negative_button_text
+    app_config = ApplicationConfig.objects.get_or_create(app=app_version)
+    app_config.individual_update = individual_update
+    app_config.dialog_title = dialog_title
+    app_config.dialog_text = dialog_message
+    app_config.dialog_ok_button = positive_button_text
+    app_config.dialog_cancel_button = negative_button_text
 
-        if update_type == 'soft':
-            app_config.force_update_soft = True
-            app_config.force_update_hard = False
-            app_config.soft_update_triggered_time = datetime.datetime.now()
-            app_config.soft_update_percent = update_percentage
+    if update_type == 'soft':
+        app_config.force_update_soft = True
+        app_config.force_update_hard = False
+        app_config.soft_update_triggered_time = datetime.datetime.now()
+        app_config.soft_update_percent = update_percentage
 
-        elif update_type == 'hard':
-            app_config.force_update_hard = True
-            app_config.force_update_soft = False
-            app_config.hard_update_triggered_time = datetime.datetime.now()
-            app_config.hard_update_percent = update_percentage
-        else:
-            json_result = {"status": {"code": INVALID_UPDATE_TYPE, "message": "Invalid update type"}}
-            return HttpResponse(json.dumps(json_result))
-        app_config.save()
-        json_result = {"status": {"code": 200, "message": " App update request successful "}}
+    elif update_type == 'hard':
+        app_config.force_update_hard = True
+        app_config.force_update_soft = False
+        app_config.hard_update_triggered_time = datetime.datetime.now()
+        app_config.hard_update_percent = update_percentage
+    else:
+        json_result = {"status": {"code": INVALID_UPDATE_TYPE, "message": "Invalid update type"}}
         return HttpResponse(json.dumps(json_result))
-    except ApplicationConfig.DoesNotExist:
-        json_result = {"status": {"code": 302, "message": " Please configure application details "}}
-        return HttpResponse(json.dumps(json_result))
+    app_config.save()
+    json_result = {"status": {"code": 200, "message": " App update request successful "}}
+    return HttpResponse(json.dumps(json_result))
 
 
 # With every request we have to see client is banned or not for that decorators can be used
@@ -118,6 +114,8 @@ def add_new_version(request):
     version_name = body['version_name']
     version_code = body['version_code']
     is_prod = body['is_production']
+    is_enabled = body['is_enabled']
+
     try:
         token = Token.objects.get(key=token_value)
     except Token.DoesNotExist:
@@ -140,10 +138,23 @@ def add_new_version(request):
             json_result = {
                 "status": {"code": VERSION_CODE_DOWNGRADE_ERROR, "message": "Version code can not be same"}}
             return HttpResponse(json.dumps(json_result))
-    new_version = AppVersions(app=app, version_name=version_name, version_code=version_code, is_production=is_prod)
+    new_version = AppVersions(app=app, version_name=version_name, version_code=version_code, is_production=is_prod,
+                              is_enabled=is_enabled)
     new_version.save()
     json_result = {"status": {"code": 200, "message": "Version added successfully"}}
     return HttpResponse(json.dumps(json_result))
+
+
+@csrf_exempt
+def config_application_version(request):
+    if request.method != "POST":
+        raise MethodNotAllowed
+    token_value = get_authorization_header(request)
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    app_token = body['app_token']
+    version_name = body['version_name']
+    version_code = body['version_code']
 
 
 @csrf_exempt
