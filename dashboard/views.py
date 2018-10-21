@@ -10,6 +10,7 @@ from datetime import date, timedelta
 from django.utils import timezone
 from rest_framework.response import Response
 from rest_framework import status
+from unnayan.models import Client
 import time
 from django.db.models import Q
 import json
@@ -97,6 +98,7 @@ def last_time_update_triggered(request):
         return HttpResponse(json.dumps(json_result))
 
 
+@csrf_exempt
 def get_company_profile(request):
     if request.method != 'GET':
         raise MethodNotAllowed
@@ -124,6 +126,47 @@ def get_company_profile(request):
     except CompanyProfile.DoesNotExist:
         json_result = {
             "status": {"code": 100, "message": " Company profile is not configured , please reach out to us "}}
+        return HttpResponse(json.dumps(json_result))
+
+
+def get_settings(request):
+    if request.method != 'GET':
+        raise MethodNotAllowed
+    token_value = get_authorization_header(request)
+    try:
+        token = Token.objects.get(key=token_value)
+    except Token.DoesNotExist:
+        raise AuthenticationFailed
+    user = token.user
+
+    try:
+        client = Client.objects.get(user=user)
+    except Client.DoesNotExist:
+        json_result = {"status": {"code": 300, "message": "Client not registered"}}
+        return HttpResponse(json.dumps(json_result))
+    app = Application.objects.filter(client=client)
+    app_tokens = []
+    if app:
+        for appobj in app:
+            app_tokens += [{
+                "app_token": appobj.app_token
+
+            }]
+        json_result = {
+            "status": {
+                "code": 200,
+                "message": "success"
+            },
+            "data": {
+                "secret": client.secret_key,
+                "is_banned": client.banned,
+                "app_token": app_tokens
+            }
+
+        }
+        return HttpResponse(json.dumps(json_result))
+    else:
+        json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
         return HttpResponse(json.dumps(json_result))
 
 

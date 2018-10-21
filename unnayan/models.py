@@ -83,12 +83,18 @@ class ApplicationConfig(models.Model):
         return self.app_version.version_name
 
 
+''' This table hold the information received from single user device '''
+
+
 class AppUserInfo(models.Model):
     app = models.ForeignKey(Application)
     device_id = models.CharField(max_length=255)
     fcm_id = models.CharField(max_length=255, blank=True)
     os = models.CharField(max_length=255)
     os_version = models.CharField(max_length=255)
+    version_name = models.CharField(max_length=255)
+    version_code = models.IntegerField()
+    package_name = models.CharField(max_length=255)
     single_update = models.BooleanField(default=False)
     register_time = models.DateTimeField(null=True, blank=True)
     hard_push_ok = models.DateTimeField(null=True, blank=True)
