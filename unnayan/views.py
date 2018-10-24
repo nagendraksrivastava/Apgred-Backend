@@ -23,7 +23,7 @@ def register_device(request):
     os_version = body['os_version']
     client_secret = body['client_secret']
     app_token = body['app_token']
-    pacakge_name = body['package_name']
+    package_name = body['package_name']
     version_name = body['version_name']
     version_code = body['version_code']
 
@@ -52,6 +52,9 @@ def register_device(request):
         app_user_info.register_time = timezone.now()
         app_user_info.app_token = app_token
         app_user_info.api_call_time = timezone.now()
+        app_user_info.version_name = version_name
+        app_user_info.version_code = version_code
+        app_user_info.package_name = package_name
         app_user_info.save()
         json_result = {"status": {"code": 200, "message": "device registered successfully"}}
         return HttpResponse(json.dumps(json_result))
@@ -84,86 +87,49 @@ def get_forceupdate(request):
         json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
         return HttpResponse(json.dump(json_result))
 
-    try:
-        app_config = ApplicationConfig.objects.get(app=application)
-        play_store_url = app_config.play_store_url
-        dialog_title = app_config.dialog_title
-        dialog_text = app_config.dialog_text
-        dialog_ok_button_text = app_config.dialog_ok_button
-        dialog_cancel_button_text = app_config.dialog_cancel_button
+    play_store_url = application.play_store_url
 
-    except ApplicationConfig.DoesNotExist:
-        json_result = {"status": {"code": 600, "message": "Application is not configured "}}
-        return HttpResponse(json.dumps(json_result))
+    app_versions = AppVersions.objects.filter(app=application)
 
-    # TODO for now it is get but later it could be filter
-    try:
-        app_versions = AppVersions.objects.get(app=application, is_production=True)
-    except AppVersions.DoesNotExist:
-        json_result = {"status": {"code": 601, "message": "Versions of application not configured please configure "
-                                                          "from dashboard  "}}
-        return HttpResponse(json.dumps(json_result))
-
-    if app_versions.version_code == version_code:
-        json_result = {"status": {"code": 200, "message": "Success"},
-                       "soft_push": False, "hard_push": False, "store_url": play_store_url, "dialog_text": dialog_text,
-                       "dialog_postive_text": dialog_ok_button_text, "dialog_cancel_button": dialog_cancel_button_text}
-
-        return HttpResponse(json.dumps(json_result))
-    if app_config.force_update_soft:
-        if app_config.individual_update:
-            # This arrangement for individual device user update
-            ind_app_user_info = AppUserInfo.objects.get(app=application, device_id=advertising_id)
-            if ind_app_user_info.single_update:
-                json_result = {"status": {"code": 200, "message": " Success "},
-                               "soft_push": True, "hard_push": False,
-                               "store_url": play_store_url, "dialog_text": dialog_text, "dialog_title": dialog_title,
-                               "dialog_postive_text": dialog_ok_button_text,
-                               "dialog_cancel_button": dialog_cancel_button_text}
+    for version in app_versions:
+        if version_code == version.version_code and not version.is_enabled:
+            app_config = ApplicationConfig.objects.get(app_version=version)
+            json_result = {"status":
+                               {"code": 200,
+                                "message": "Success"
+                                },
+                           "soft_push": False,
+                           "hard_push": True,
+                           "store_url": play_store_url,
+                           "dialog_text": app_config.dialog_text,
+                           "dialog_title": app_config.dialog_title,
+                           "dialog_postive_text": app_config.dialog_ok_button,
+                           "dialog_cancel_button": app_config.dialog_cancel_button
+                           }
+            return HttpResponse(json.dumps(json_result))
+        if version_code < version.version_code and version.is_enabled:
+            version_app_config = ApplicationConfig.objects.get(app_version=version)
+            if version_app_config.force_update_hard:
+                json_result = {"status": {"code": 200, "message": "Success"},
+                               "soft_push": False,
+                               "hard_push": True,
+                               "store_url": play_store_url,
+                               "dialog_text": version_app_config.dialog_text,
+                               "dialog_title": version_app_config.dialog_title,
+                               "dialog_postive_text": version_app_config.dialog_ok_button_text,
+                               "dialog_cancel_button": version_app_config.dialog_cancel_button_text}
                 return HttpResponse(json.dumps(json_result))
-        if app_config.soft_update_percent == 100:
-            # no need to query from database here , return soft push true for every one
-            print "Soft update 100 percent "
-            json_result = {"status": {"code": 200, "message": " Success "},
-                           "soft_push": True, "hard_push": False, "store_url": play_store_url,
-                           "dialog_text": dialog_text,
-                           "dialog_title": dialog_title,
-                           "dialog_postive_text": dialog_ok_button_text,
-                           "dialog_cancel_button": dialog_cancel_button_text}
-            return HttpResponse(json.dumps(json_result))
-        if app_config.soft_update_percent < 100:
-            # This handles pushing update to user on percentage basis
-            percentage_user_info = AppUserInfo.objects.raw(" SELECT * FROM apgred_appuserinfo WHERE RAND() <= %s",
-                                                           app_config.soft_update_percent)
-            # TODO
-            # if code comes here it means percentage is less than 100%
-            # Case 1 - the percentage is in numbers
-            # case 2  company wants an individual update
-    if app_config.force_update_hard:
-        if app_config.individual_update:
-            ind_app_user_info = AppUserInfo.objects.get(app=application, device_id=advertising_id)
-            if ind_app_user_info.single_update:
+
+            if version_app_config.force_update_soft:
                 json_result = {"status": {"code": 200, "message": " Success "},
-                               "soft_push": False, "hard_push": True, "store_url": play_store_url,
-                               "dialog_text": dialog_text, "dialog_postive_text": dialog_ok_button_text,
-                               "dialog_cancel_button": dialog_cancel_button_text}
+                               "soft_push": True,
+                               "hard_push": False,
+                               "store_url": play_store_url,
+                               "dialog_text": version_app_config.dialog_text,
+                               "dialog_title": version_app_config.dialog_title,
+                               "dialog_postive_text": version_app_config.dialog_ok_button_text,
+                               "dialog_cancel_button": version_app_config.dialog_cancel_button_text}
                 return HttpResponse(json.dumps(json_result))
-        if app_config.hard_update_percent == 100:
-            json_result = {"status": {"code": 200, "message": "Success"},
-                           "soft_push": False, "hard_push": True,
-                           "store_url": play_store_url, "dialog_text": dialog_text, "dialog_title": dialog_title,
-                           "dialog_postive_text": dialog_ok_button_text,
-                           "dialog_cancel_button": dialog_cancel_button_text}
-            return HttpResponse(json.dumps(json_result))
-        if app_config.hard_update_percent < 100:
-            # TODO
-            json_result = {"status": {"code": 200, "message": "Success"},
-                           "soft_push": False, "hard_push": True,
-                           "store_url": play_store_url, "dialog_text": dialog_text, "dialog_title": dialog_title,
-                           "dialog_postive_text": dialog_ok_button_text,
-                           "dialog_cancel_button": dialog_cancel_button_text}
-            return HttpResponse(json.dumps(json_result))
-            # TODO
 
 
 @csrf_exempt
@@ -187,6 +153,7 @@ def soft_update_cancel(request):
     except Application.DoesNotExist:
         json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
         return HttpResponse(json.dump(json_result))
+
     try:
         app_user_info = AppUserInfo.objects.get(app=application, device_id=advertising_id)
         app_user_info.soft_push_cancel_time = timezone.now()

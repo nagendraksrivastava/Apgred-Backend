@@ -74,7 +74,6 @@ class ApplicationConfig(models.Model):
     dialog_title = models.TextField()
     dialog_ok_button = models.CharField(max_length=255, default="Ok")
     dialog_cancel_button = models.CharField(max_length=255, default="Cancel")
-    play_store_url = models.TextField()
     manual_update = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
