@@ -116,8 +116,8 @@ def get_forceupdate(request):
                                "store_url": play_store_url,
                                "dialog_text": version_app_config.dialog_text,
                                "dialog_title": version_app_config.dialog_title,
-                               "dialog_postive_text": version_app_config.dialog_ok_button_text,
-                               "dialog_cancel_button": version_app_config.dialog_cancel_button_text}
+                               "dialog_postive_text": version_app_config.dialog_ok_button,
+                               "dialog_cancel_button": version_app_config.dialog_cancel_button}
                 return HttpResponse(json.dumps(json_result))
 
             if version_app_config.force_update_soft:
@@ -127,8 +127,8 @@ def get_forceupdate(request):
                                "store_url": play_store_url,
                                "dialog_text": version_app_config.dialog_text,
                                "dialog_title": version_app_config.dialog_title,
-                               "dialog_postive_text": version_app_config.dialog_ok_button_text,
-                               "dialog_cancel_button": version_app_config.dialog_cancel_button_text}
+                               "dialog_postive_text": version_app_config.dialog_ok_button,
+                               "dialog_cancel_button": version_app_config.dialog_cancel_button}
                 return HttpResponse(json.dumps(json_result))
 
 
