@@ -130,6 +130,9 @@ def get_forceupdate(request):
                                "dialog_postive_text": version_app_config.dialog_ok_button,
                                "dialog_cancel_button": version_app_config.dialog_cancel_button}
                 return HttpResponse(json.dumps(json_result))
+        if version_code > version.version_code:
+            json_result = {"status": {"code": 200, "message": " Version is already up to date  "}
+            return HttpResponse(json.dumps(json_result))
 
 
 @csrf_exempt
