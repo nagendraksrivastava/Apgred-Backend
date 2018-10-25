@@ -119,8 +119,7 @@ def get_forceupdate(request):
                                "dialog_postive_text": version_app_config.dialog_ok_button,
                                "dialog_cancel_button": version_app_config.dialog_cancel_button}
                 return HttpResponse(json.dumps(json_result))
-
-            if version_app_config.force_update_soft:
+            elif version_app_config.force_update_soft:
                 json_result = {"status": {"code": 200, "message": " Success "},
                                "soft_push": True,
                                "hard_push": False,
