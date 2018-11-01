@@ -14,6 +14,7 @@ from dashboard.models import PotentialCustomer
 from rest_framework.exceptions import MethodNotAllowed, NotFound, AuthenticationFailed
 from CustomException import EmailAlreadyRegistered, UnknownProblem
 from unnayan.models import Client, Application, CompanyProfile
+from unnayan.apgred_sdk_auth import verify_digest
 
 
 # Create your views here.
@@ -106,10 +107,19 @@ def signup_user(request):
 def business_lead(request):
     if request.method != 'POST':
         raise MethodNotAllowed
+    hash_value = get_authorization_header(request)
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     email = body['email']
     phone_number = body['phone_number']
+
+    param_list=[]
+    param_list.append(email)
+    param_list.append(phone_number)
+
+    if not verify_digest(param_list, hash_value):
+        raise MethodNotAllowed
+
     try:
         PotentialCustomer.objects.get(email=email)
         raise EmailAlreadyRegistered

@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponseForbidden, HttpResponse
+from django.http import HttpResponse
 from django.db.models import F
 
-from django.shortcuts import render
 from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
 from models import AppUserInfo, Client, ApplicationConfig, Application, AppVersions
+from apgred_sdk_auth import verify_digest
 import json
+from rest_framework.authentication import get_authorization_header
+from rest_framework.exceptions import MethodNotAllowed
 
 
 @csrf_exempt
@@ -16,6 +17,7 @@ def register_device(request):
     if request.method != 'POST':
         json_result = {"status": {"code": 400, "message": "Bad Request"}}
         return HttpResponse(json.dumps(json_result))
+    hash_value = get_authorization_header(request)
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     advertising_id = body['advertising_id']
@@ -26,6 +28,19 @@ def register_device(request):
     package_name = body['package_name']
     version_name = body['version_name']
     version_code = body['version_code']
+
+    param_list = []
+    param_list.append(advertising_id)
+    param_list.append(os)
+    param_list.append(os_version)
+    param_list.append(client_secret)
+    param_list.append(app_token)
+    param_list.append(package_name)
+    param_list.append(version_name)
+    param_list.append(version_code)
+
+    if not verify_digest(param_list, hash_value):
+        raise MethodNotAllowed
 
     try:
         client = Client.objects.get(secret_key=client_secret)
@@ -65,6 +80,7 @@ def get_forceupdate(request):
     if request.method != 'POST':
         json_result = {"status": {"code": 400, "message": "Bad Request"}}
         return HttpResponse(json.dumps(json_result))
+    hash_value = get_authorization_header(request)
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     os = body['os']  # use it later for version based update TODO
@@ -75,6 +91,19 @@ def get_forceupdate(request):
     pacakge_name = body['package_name']
     version_name = body['version_name']
     version_code = body['version_code']
+
+    param_list = []
+    param_list.append(os)
+    param_list.append(os_version)
+    param_list.append(client_secret)
+    param_list.append(app_token)
+    param_list.append(advertising_id)
+    param_list.append(pacakge_name)
+    param_list.append(version_name)
+    param_list.append(version_code)
+
+    if not verify_digest(param_list, hash_value):
+        raise MethodNotAllowed
 
     try:
         client = Client.objects.get(secret_key=client_secret)
@@ -137,11 +166,21 @@ def soft_update_cancel(request):
     if request.method != 'POST':
         json_result = {"status": {"code": 400, "message": "Bad Request"}}
         return HttpResponse(json.dumps(json_result))
+    hash_value = get_authorization_header(request)
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     client_secret = body['client_secret']
     app_token = body['app_token']
     advertising_id = body['advertising_id']
+
+    param_list = []
+    param_list.append(client_secret)
+    param_list.append(app_token)
+    param_list.append(advertising_id)
+
+    if not verify_digest(param_list, hash_value):
+        raise MethodNotAllowed
+
     try:
         client = Client.objects.get(secret_key=client_secret)
     except Client.DoesNotExist:
@@ -172,11 +211,21 @@ def soft_push_ok_click(request):
     if request.method != 'POST':
         json_result = {"status": {"code": 400, "message": "Bad Request"}}
         return HttpResponse(json.dumps(json_result))
+    hash_value = get_authorization_header(request)
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     client_secret = body['client_secret']
     app_token = body['app_token']
     advertising_id = body['advertising_id']
+
+    param_list = []
+    param_list.append(client_secret)
+    param_list.append(app_token)
+    param_list.append(advertising_id)
+
+    if not verify_digest(param_list, hash_value):
+        raise MethodNotAllowed
+
     try:
         client = Client.objects.get(secret_key=client_secret)
     except Client.DoesNotExist:
@@ -203,11 +252,20 @@ def hard_push_ok_click(request):
     if request.method != 'POST':
         json_result = {"status": {"code": 400, "message": "Bad Request"}}
         return HttpResponse(json.dumps(json_result))
+    hash_value = get_authorization_header(request)
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     client_secret = body['client_secret']
     app_token = body['app_token']
     device_id = body['advertising_id']
+
+    param_list = []
+    param_list.append(client_secret)
+    param_list.append(app_token)
+    param_list.append(device_id)
+
+    if not verify_digest(param_list, hash_value):
+        raise MethodNotAllowed
 
     try:
         client = Client.objects.get(secret_key=client_secret)
@@ -236,10 +294,19 @@ def validate_client(request):
     if request.method != 'POST':
         json_result = {"status": {"code": 400, "message": "Bad Request"}}
         return HttpResponse(json.dumps(json_result))
+    hash_value = get_authorization_header(request)
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     app_token = body['app_token']
     client_secret = body['client_secret']
+
+    param_list = []
+    param_list.append(app_token)
+    param_list.append(client_secret)
+
+    if not verify_digest(param_list, hash_value):
+        raise MethodNotAllowed
+
     try:
         client = Client.objects.get(secret_key=client_secret)
     except Client.DoesNotExist:
