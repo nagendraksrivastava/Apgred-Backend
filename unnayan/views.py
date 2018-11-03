@@ -119,7 +119,6 @@ def get_forceupdate(request):
                                "dialog_postive_text": version_app_config.dialog_ok_button,
                                "dialog_cancel_button": version_app_config.dialog_cancel_button}
                 return HttpResponse(json.dumps(json_result))
-
             if version_app_config.force_update_soft:
                 json_result = {"status": {"code": 200, "message": " Success "},
                                "soft_push": True,
@@ -130,6 +129,14 @@ def get_forceupdate(request):
                                "dialog_postive_text": version_app_config.dialog_ok_button,
                                "dialog_cancel_button": version_app_config.dialog_cancel_button}
                 return HttpResponse(json.dumps(json_result))
+        if version_code > version.version_code:
+            json_result = {"status": {"code": 200, "message": " Version is already up to date "},
+                           "soft_push": False,
+                           "hard_push": False,
+                           "store_url": play_store_url
+                           }
+
+            return HttpResponse(json.dumps(json_result))
 
 
 @csrf_exempt
