@@ -40,6 +40,7 @@ class Application(models.Model):
     package_name = models.CharField(max_length=255)
     app_logo = models.CharField(max_length=255, null=True, blank=True)
     play_store_url = models.TextField(null=True, blank=True)
+    feedback_enabled = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
@@ -53,6 +54,7 @@ class AppVersions(models.Model):
     version_code = models.IntegerField()
     is_production = models.BooleanField()
     is_enabled = models.BooleanField(default=True)
+    is_feedback_enabled = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
@@ -99,7 +101,8 @@ class AppUserInfo(models.Model):
     hard_push_ok = models.DateTimeField(null=True, blank=True)
     soft_push_ok = models.DateTimeField(null=True, blank=True)
     soft_push_cancel_time = models.DateTimeField(null=True, blank=True)
-    soft_push_cancel_counter = models.IntegerField(null=True, blank=True, default=0)
+    soft_push_cancel_counter = models.IntegerField(
+        null=True, blank=True, default=0)
     # reason for not updating the current version of the app
     reason = models.ForeignKey(Reasons, blank=True, null=True)
     api_call_time = models.DateTimeField(null=True, blank=True)
