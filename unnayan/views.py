@@ -78,7 +78,7 @@ def register_device(request):
 @csrf_exempt
 def get_forceupdate(request):
     if request.method != 'POST':
-        json_result = {"status": {"code": 400, "message": "Bad Request"}}
+        json_result = {"status": {"code": 400, "message": "Do not know what you want"}}
         return HttpResponse(json.dumps(json_result))
     hash_value = get_authorization_header(request)
     body_unicode = request.body.decode('utf-8')

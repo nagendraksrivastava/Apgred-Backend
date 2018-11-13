@@ -23,7 +23,9 @@ from unnayan.apgred_sdk_auth import verify_digest
 @csrf_exempt
 def login_user(request):
     if request.method != 'POST':
-        raise MethodNotAllowed
+        json_result = {"status": {"code": 400,
+                                  "message": "Do not know what you want"}}
+        return HttpResponse(json.dumps(json_result))
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     email = body['email']
@@ -38,13 +40,15 @@ def login_user(request):
         try:
             client = Client.objects.get(user=user)
         except Client.DoesNotExist:
-            json_result = {"status": {"code": 300, "message": "Client not registered"}}
+            json_result = {"status": {"code": 300,
+                                      "message": "Client not registered"}}
             return HttpResponse(json.dumps(json_result))
 
         try:
             company_profile = CompanyProfile.objects.get(user=user)
         except CompanyProfile.DoesNotExist:
-            json_result = {"status": {"code": 355, "message": "Company profile not created"}}
+            json_result = {"status": {"code": 355,
+                                      "message": "Company profile not created"}}
             return HttpResponse(json.dumps(json_result))
 
         app = Application.objects.filter(client=client)
@@ -63,7 +67,8 @@ def login_user(request):
                 }]
             return HttpResponse(json.dumps(json_result))
         else:
-            json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
+            json_result = {"status": {
+                "code": 301, "message": "Client registered but app not registered "}}
             return HttpResponse(json.dumps(json_result))
     else:
         raise NotFound
@@ -75,7 +80,9 @@ def login_user(request):
 @csrf_exempt
 def signup_user(request):
     if request.method != 'POST':
-        raise MethodNotAllowed
+        json_result = {"status": {"code": 400,
+                                  "message": "Do not know what you want"}}
+        return HttpResponse(json.dumps(json_result))
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     email = body['email']
@@ -106,26 +113,31 @@ def signup_user(request):
 @csrf_exempt
 def business_lead(request):
     if request.method != 'POST':
-        raise MethodNotAllowed
+        json_result = {"status": {"code": 400,
+                                  "message": "Do not know what you want"}}
+        return HttpResponse(json.dumps(json_result))
     hash_value = get_authorization_header(request)
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     email = body['email']
     phone_number = body['phone_number']
 
-    param_list=[]
+    param_list = []
     param_list.append(email)
     param_list.append(phone_number)
 
     if not verify_digest(param_list, hash_value):
-        raise MethodNotAllowed
+        json_result = {"status": {"code": 400,
+                                  "message": "Do not know what you want"}}
+        return HttpResponse(json.dumps(json_result))
 
     try:
         PotentialCustomer.objects.get(email=email)
         raise EmailAlreadyRegistered
     except PotentialCustomer.DoesNotExist:
         print("User signup for the first time")
-    new_lead = PotentialCustomer.objects.create(email=email, phone_number=phone_number)
+    new_lead = PotentialCustomer.objects.create(
+        email=email, phone_number=phone_number)
     new_lead.save()
     json_result = {
         "message": "Thank you for contacting us we will get back to you shortly"
@@ -136,7 +148,9 @@ def business_lead(request):
 @csrf_exempt
 def logout_user(request):
     if request.method != 'GET':
-        raise MethodNotAllowed
+        json_result = {"status": {"code": 400,
+                                  "message": "Do not know what you want"}}
+        return HttpResponse(json.dumps(json_result))
     logout(request)
     token_value = get_authorization_header(request)
     try:
@@ -151,7 +165,9 @@ def logout_user(request):
 @csrf_exempt
 def reset_password(request):
     if request.method != 'POST':
-        raise MethodNotAllowed
+        json_result = {"status": {"code": 400,
+                                  "message": "Do not know what you want"}}
+        return HttpResponse(json.dumps(json_result))
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     email = body['email']
@@ -160,5 +176,6 @@ def reset_password(request):
             "message": "Reset password email sent, please check your mail"}
         return HttpResponse(json.dumps(json_result))
     else:
-        json_result = {"message": "email not registered with us please reach out to us"}
+        json_result = {
+            "message": "email not registered with us please reach out to us"}
         return HttpResponse(json.dumps(json_result))
