@@ -116,7 +116,8 @@ def business_lead(request):
         json_result = {"status": {"code": 400,
                                   "message": "Do not know what you want"}}
         return HttpResponse(json.dumps(json_result))
-    hash_value = get_authorization_header(request)
+    hash_value = request.META['HTTP_HASH']
+    print 'hash value is = ' + hash_value
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     email = body['email']
