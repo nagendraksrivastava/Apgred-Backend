@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+from corsheaders.defaults import default_headers
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,7 +26,7 @@ SECRET_KEY = 'm1#=87q_jp95ix3wz0a@-deim6+4#tj3ci&a5$3cmwk$uh89f7'
 DEBUG = True
 
 ALLOWED_HOSTS = ['35.198.235.7', 'apgred.com']
-# ALLOWED_HOSTS = ['*']
+#ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -55,6 +56,10 @@ MIDDLEWARE = [
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_ALLOW_HEADERS = default_headers + (
+    'HASH',
+)
 
 ROOT_URLCONF = 'apgred.urls'
 
