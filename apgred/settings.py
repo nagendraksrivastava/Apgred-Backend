@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'unnayan',
     'dashboard',
+    'feedback',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
@@ -88,10 +89,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'apgred',
-        'USER': 'django',
-        'PASSWORD': 'nagendra',
-        # 'USER': 'root',
-        # 'PASSWORD': '',
+         'USER': 'django',
+         'PASSWORD': 'nagendra',
+       # 'USER': 'root',
+       # 'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '',
     }
