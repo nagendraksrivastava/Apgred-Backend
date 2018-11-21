@@ -4,16 +4,26 @@ from __future__ import unicode_literals
 from django.db import models
 from unnayan.models import Application, AppVersions
 
+
 # Create your models here.
 
+
 class FeedbackCategory(models.Model):
-    app = models.ForeignKey(Application) # for each app we will have category created by client 
-    category_text = models.TextField()
-    is_enabled = models.BooleanField(default=False)
+    # for each app we will have category created by client
+    class Meta:
+        unique_together = ("app", "category_text")
+
+    app = models.ForeignKey(Application)
+    category_text = models.CharField(max_length=255)
+    is_enabled = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
-class Feedback(models.Model):
+    def __unicode__(self):
+        return self.category_text
+
+
+class UserFeedback(models.Model):
     app = models.ForeignKey(Application)
     app_version = models.ForeignKey(AppVersions)
     category = models.ForeignKey(FeedbackCategory)
@@ -27,4 +37,3 @@ class Feedback(models.Model):
     os_version = models.CharField(max_length=64)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
-    

@@ -19,6 +19,7 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^api/admin/', admin.site.urls),
     url(r'^api/unnayan/v1/', include('unnayan.urls')),
-    url(r'^api/dashboard/v1/', include('dashboard.urls'))
+    url(r'^api/dashboard/v1/', include('dashboard.urls')),
+    url(r'^api/feedback/v1/', include('feedback.urls')),
 
 ]
