@@ -10,7 +10,7 @@ from datetime import date, timedelta
 from django.utils import timezone
 from rest_framework.response import Response
 from rest_framework import status
-from unnayan.models import Client
+from unnayan.models import Client, AppVersions
 import time
 from django.db.models import Q
 import json
@@ -145,6 +145,46 @@ def get_company_profile(request):
         json_result = {
             "status": {"code": 100, "message": " Company profile is not configured , please reach out to us "}}
         return HttpResponse(json.dumps(json_result))
+
+
+@csrf_exempt
+def get_release_notes(request):
+    if request.method != 'GET':
+        raise MethodNotAllowed
+    token_value = get_authorization_header(request)
+    app_token = request.GET['app_token']
+    try:
+        token = Token.objects.get(key=token_value)
+    except Token.DoesNotExist:
+        raise AuthenticationFailed
+    try:
+        app = Application.objects.get(app_token=app_token)
+    except Application.DoesNotExist:
+        json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
+        return HttpResponse(json.dumps(json_result))
+    app_versions = AppVersions.objects.filter(app=app)
+    info = []
+    for version in app_versions:
+        info += [
+            {
+                "version_code": version.version_code,
+                "version_name": version.version_name,
+                "release_notes": version.release_notes,
+                "is_enabled": version.is_enabled,
+                "is_production": version.is_production
+            }
+        ]
+
+    json_result = {
+        "status":
+            {"code": 200,
+             "message": " success "},
+        "package": app.package_name,
+        "app_name": app.app_name,
+        "info": info
+
+    }
+    return HttpResponse(json.dumps(json_result))
 
 
 def get_settings(request):

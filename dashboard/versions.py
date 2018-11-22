@@ -119,6 +119,7 @@ def add_new_version(request):
     version_code = body['version_code']
     is_prod = body['is_production']
     is_enabled = body['is_enabled']
+    release_notes = body['release_notes']
 
     try:
         token = Token.objects.get(key=token_value)
@@ -142,8 +143,10 @@ def add_new_version(request):
             json_result = {
                 "status": {"code": VERSION_CODE_DOWNGRADE_ERROR, "message": "Version code can not be same"}}
             return HttpResponse(json.dumps(json_result))
-    new_version = AppVersions(app=app, version_name=version_name, version_code=version_code, is_production=is_prod,
-                              is_enabled=is_enabled)
+    new_version = AppVersions.objects.create(app=app, version_name=version_name, version_code=version_code,
+                                             is_production=is_prod,
+                                             is_enabled=is_enabled)
+    new_version.release_notes = release_notes
     new_version.save()
     json_result = {"status": {"code": 200, "message": "Version added successfully"}}
     return HttpResponse(json.dumps(json_result))
