@@ -58,7 +58,7 @@ class AppVersions(models.Model):
     is_production = models.BooleanField()
     is_enabled = models.BooleanField(default=True)
     is_feedback_enabled = models.BooleanField(default=False)
-    release_notes = models.TextField()
+    release_notes = models.TextField(blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
