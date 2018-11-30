@@ -33,7 +33,6 @@ def get_all_versions(request):
                 "package_name": app.package_name,
                 "version_name": version.version_name,
                 "version_code": version.version_code,
-                "is_production": version.is_production,
                 "is_enabled": version.is_enabled
             }]
         json_versions = {"version_details": version_details}
@@ -117,7 +116,6 @@ def add_new_version(request):
     app_token = body['app_token']
     version_name = body['version_name']
     version_code = body['version_code']
-    is_prod = body['is_production']
     is_enabled = body['is_enabled']
     release_notes = body['release_notes']
 
@@ -144,24 +142,11 @@ def add_new_version(request):
                 "status": {"code": VERSION_CODE_DOWNGRADE_ERROR, "message": "Version code can not be same"}}
             return HttpResponse(json.dumps(json_result))
     new_version = AppVersions.objects.create(app=app, version_name=version_name, version_code=version_code,
-                                             is_production=is_prod,
                                              is_enabled=is_enabled)
     new_version.release_notes = release_notes
     new_version.save()
     json_result = {"status": {"code": 200, "message": "Version added successfully"}}
     return HttpResponse(json.dumps(json_result))
-
-
-@csrf_exempt
-def config_application_version(request):
-    if request.method != "POST":
-        raise MethodNotAllowed
-    token_value = get_authorization_header(request)
-    body_unicode = request.body.decode('utf-8')
-    body = json.loads(body_unicode)
-    app_token = body['app_token']
-    version_name = body['version_name']
-    version_code = body['version_code']
 
 
 @csrf_exempt
@@ -191,42 +176,6 @@ def enable_disable_version(request):
         else:
             json_result = {"status": {"code": 200, "message": " Version disabled successfully "}}
         app_version.is_enabled = is_enable
-        app_version.save()
-        return HttpResponse(json.dumps(json_result))
-    except AppVersions.DoesNotExist:
-        json_result = {"status": {"code": 304, "message": " Version does not exist "}}
-        return HttpResponse(json.dumps(json_result))
-
-
-@csrf_exempt
-def enable_disable_prod(request):
-    if request.method != "POST":
-        raise MethodNotAllowed
-    token_value = get_authorization_header(request)
-    body_unicode = request.body.decode('utf-8')
-    body = json.loads(body_unicode)
-    app_token = body['app_token']
-    version_name = body['version_name']
-    version_code = body['version_code']
-    is_prod = body['is_production']
-
-    try:
-        token = Token.objects.get(key=token_value)
-    except Token.DoesNotExist:
-        raise AuthenticationFailed
-    try:
-        app = Application.objects.get(app_token=app_token)
-    except Application.DoesNotExist:
-        json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
-        return HttpResponse(json.dumps(json_result))
-
-    try:
-        app_version = AppVersions.objects.get(app=app, version_name=version_name, version_code=version_code)
-        if is_prod:
-            json_result = {"status": {"code": 2000, "message": " App enabled for production "}}
-        else:
-            json_result = {"status": {"code": 2001, "message": " App disabled for production "}}
-        app_version.is_production = is_prod
         app_version.save()
         return HttpResponse(json.dumps(json_result))
     except AppVersions.DoesNotExist:

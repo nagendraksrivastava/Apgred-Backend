@@ -170,8 +170,7 @@ def get_release_notes(request):
                 "version_code": version.version_code,
                 "version_name": version.version_name,
                 "release_notes": version.release_notes,
-                "is_enabled": version.is_enabled,
-                "is_production": version.is_production
+                "is_enabled": version.is_enabled
             }
         ]
 
