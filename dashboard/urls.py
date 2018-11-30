@@ -2,6 +2,7 @@ from django.conf.urls import url
 from auth import login_user, logout_user, business_lead, reset_password, signup_user
 from views import total_user, get_active_user_count, last_time_update_triggered, get_settings, get_company_profile
 from versions import get_all_versions, request_update, add_new_version, enable_disable_version, enable_disable_prod
+from views import get_release_notes
 
 urlpatterns = [
     url(r'^login/$', login_user),
@@ -20,4 +21,5 @@ urlpatterns = [
     url(r'^lasttriggeredupdate/', last_time_update_triggered),
     url(r'^profile/', get_company_profile),
     url(r'^settings/', get_settings),
+    url(r'^releasehistory/', get_release_notes),
 ]
