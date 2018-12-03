@@ -39,7 +39,7 @@ def total_user(request):
     data = {'total_user': total_user_count}
     return HttpResponse(json.dumps(data))
 
-
+@csrf_exempt
 def get_active_user_count(request):
     if request.method != 'GET':
         raise MethodNotAllowed
@@ -79,7 +79,7 @@ def get_active_user_count(request):
         }
         return HttpResponse(json.dumps(data))
 
-
+@csrf_exempt
 def last_time_update_triggered(request):
     if request.method != 'GET':
         raise MethodNotAllowed
@@ -153,6 +153,7 @@ def get_release_notes(request):
         raise MethodNotAllowed
     token_value = get_authorization_header(request)
     app_token = request.GET['app_token']
+    version = request.GET['version']
     try:
         token = Token.objects.get(key=token_value)
     except Token.DoesNotExist:
@@ -162,7 +163,14 @@ def get_release_notes(request):
     except Application.DoesNotExist:
         json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
         return HttpResponse(json.dumps(json_result))
-    app_versions = AppVersions.objects.filter(app=app)
+    if version == 'all':
+        app_versions = AppVersions.objects.filter(app=app)
+        return release_history_info(app, app_versions)
+    app_versions = AppVersions.objects.filter(app=app, version_name=version)
+    return release_history_info(app, app_versions)
+
+
+def release_history_info(app, app_versions):
     info = []
     for version in app_versions:
         info += [
@@ -173,7 +181,6 @@ def get_release_notes(request):
                 "is_enabled": version.is_enabled
             }
         ]
-
     json_result = {
         "status":
             {"code": 200,
@@ -186,6 +193,7 @@ def get_release_notes(request):
     return HttpResponse(json.dumps(json_result))
 
 
+@csrf_exempt
 def get_settings(request):
     if request.method != 'GET':
         raise MethodNotAllowed
