@@ -109,7 +109,6 @@ def get_user_feedback(request):
                     "email": feedback.email,
                     "version_name": feedback.app_version.version_name,
                     "version_code": feedback.app_version.version_code,
-                    "is_production": feedback.app_version.is_production,
                     "is_enabled": feedback.app_version.is_enabled
                 }
             ]
@@ -134,7 +133,6 @@ def get_user_feedback(request):
                 "email": feedback.email,
                 "version_name": feedback.app_version.version_name,
                 "version_code": feedback.app_version.version_code,
-                "is_production": feedback.app_version.is_production,
                 "is_enabled": feedback.app_version.is_enabled
             }
         ]
