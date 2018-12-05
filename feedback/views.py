@@ -82,8 +82,9 @@ def get_user_feedback(request):
         raise MethodNotAllowed
     token_value = get_authorization_header(request)
     app_token = request.GET['app_token']
-    version_code = request.GET['version_code']
     category_param = request.GET['category_param']
+    version_name = request.GET.get('version_name', default=None)
+    version_code = request.GET.get('version_code', default=None)
     try:
         token = Token.objects.get(key=token_value)
     except Token.DoesNotExist:
@@ -94,48 +95,30 @@ def get_user_feedback(request):
         json_result = {"status": {"code": 301,
                                   "message": "Client registered but app not registered "}}
         return HttpResponse(json.dumps(json_result))
-
-    # break feedback category with all, others , category name
     feedback_info = []
-    if category_param == 'all':
-        for feedback in UserFeedback.objects.filter(app=app):
-            feedback_info += [
-                {
-                    "id": feedback.id,
-                    "os": feedback.os,
-                    "os_version": feedback.os_version,
-                    "submited_date": feedback.submited_date,
-                    "text": feedback.text,
-                    "email": feedback.email,
-                    "version_name": feedback.app_version.version_name,
-                    "version_code": feedback.app_version.version_code,
-                    "is_enabled": feedback.app_version.is_enabled
-                }
-            ]
-        json_result = {
-            "status": {
-                "code": 200,
-                "message": "all the feedback"
-            },
-            "feedback": feedback_info
-        }
-        return HttpResponse(json.dumps(json_result))
-    category = FeedbackCategory.objects.get(
-        app=app, category_text=category_param)
-    for feedback in UserFeedback.objects.filter(app=app, category=category):
-        feedback_info += [
-            {
-                "id": feedback.id,
-                "os": feedback.os,
-                "os_version": feedback.os_version,
-                "submited_date": feedback.submited_date,
-                "text": feedback.text,
-                "email": feedback.email,
-                "version_name": feedback.app_version.version_name,
-                "version_code": feedback.app_version.version_code,
-                "is_enabled": feedback.app_version.is_enabled
-            }
-        ]
+    if version_code is not None and version_name is not None:
+        if category_param == 'all':
+            return get_all_feedback(app, feedback_info)
+        return version_filtered_feedback(app, category_param, feedback_info, version_code, version_name)
+    if version_name is not None and version_code is None:
+        if category_param == 'all':
+            return get_all_feedback(app, feedback_info)
+        return version_name_filtered_feedback(app, category_param, feedback_info, version_name)
+    if version_name is None and version_code is not None:
+        if category_param == 'all':
+            return get_all_feedback(app, feedback_info)
+        return version_code_filtered_feedback(app, category_param, feedback_info, version_code)
+
+    if version_name is None and version_code is None:
+        if category_param == 'all':
+            return get_all_feedback(app, feedback_info)
+        return category_filtered_feedback(app, category_param, feedback_info)
+
+
+def version_filtered_feedback(app, category_param, feedback_info, version_code, version_name):
+    app_version = AppVersions.objects.get(app=app, version_name=version_name, version_code=version_code)
+    for feedback in UserFeedback.objects.filter(app=app, app_version=app_version, category=category_param):
+        feedback_info = get_feedback_info(feedback, feedback_info)
     json_result = {
         "status": {
             "code": 200,
@@ -144,6 +127,78 @@ def get_user_feedback(request):
         "feedback": feedback_info
     }
     return HttpResponse(json.dumps(json_result))
+
+
+def version_name_filtered_feedback(app, category_param, feedback_info, version_name):
+    app_version = AppVersions.objects.filter(app=app, version_name=version_name)
+    for version in app_version:
+        for feedback in UserFeedback.objects.filter(app=app, app_version=version, category=category_param):
+            feedback_info = get_feedback_info(feedback, feedback_info)
+    json_result = {
+        "status": {
+            "code": 200,
+            "message": "all the feedback"
+        },
+        "feedback": feedback_info
+    }
+    return HttpResponse(json.dumps(json_result))
+
+
+def category_filtered_feedback(app, category_param, feedback_info):
+    for feedback in UserFeedback.objects.filter(app=app, category=category_param):
+        feedback_info = get_feedback_info(feedback, feedback_info)
+    json_result = {
+        "status": {
+            "code": 200,
+            "message": "all the feedback"
+        },
+        "feedback": feedback_info
+    }
+    return HttpResponse(json.dumps(json_result))
+
+
+def version_code_filtered_feedback(app, category_param, feedback_info, version_code):
+    app_version = AppVersions.objects.get(app=app, version_code=version_code)
+    for feedback in UserFeedback.objects.filter(app=app, app_version=app_version, category=category_param):
+        feedback_info = get_feedback_info(feedback, feedback_info)
+    json_result = {
+        "status": {
+            "code": 200,
+            "message": "all the feedback"
+        },
+        "feedback": feedback_info
+    }
+    return HttpResponse(json.dumps(json_result))
+
+
+def get_all_feedback(app, feedback_info):
+    for feedback in UserFeedback.objects.filter(app=app):
+        feedback_info = get_feedback_info(feedback, feedback_info)
+    json_result = {
+        "status": {
+            "code": 200,
+            "message": "all the feedback"
+        },
+        "feedback": feedback_info
+    }
+    return HttpResponse(json.dumps(json_result))
+
+
+def get_feedback_info(feedback, feedback_info):
+    feedback_info += [
+        {
+            "id": feedback.id,
+            "os": feedback.os,
+            "os_version": feedback.os_version,
+            "submited_date": feedback.submited_date,
+            "text": feedback.text,
+            "email": feedback.email,
+            "version_name": feedback.app_version.version_name,
+            "version_code": feedback.app_version.version_code,
+            "is_enabled": feedback.app_version.is_enabled
+        }
+    ]
+    return feedback_info
 
 
 @csrf_exempt
