@@ -33,6 +33,7 @@ def get_all_versions(request):
                 "package_name": app.package_name,
                 "version_name": version.version_name,
                 "version_code": version.version_code,
+                "release_notes": version.release_notes,
                 "is_enabled": version.is_enabled
             }]
         json_versions = {"version_details": version_details}
