@@ -5,8 +5,9 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from rest_framework.authentication import get_authorization_header
-from rest_framework.exceptions import MethodNotAllowed
+from rest_framework.exceptions import MethodNotAllowed, AuthenticationFailed, APIException
 from rest_framework.authtoken.models import Token
+from django.utils import timezone
 import json
 import datetime
 from models import FeedbackCategory, UserFeedback
@@ -316,3 +317,25 @@ def post_user_feedback(request):
     json_result = {"status": {"code": 200,
                               "message": " feedback saved successfully "}}
     return HttpResponse(json.dumps(json_result))
+
+
+@csrf_exempt
+def acknowledge_feedback(request):
+    if request.method != 'POST':
+        raise MethodNotAllowed
+    token_value = get_authorization_header(request)
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    feedback_id = body['id']
+    try:
+        token = Token.objects.get(key=token_value)
+    except Token.DoesNotExist:
+        raise AuthenticationFailed
+    try:
+        feedback = UserFeedback.objects.get(id=feedback_id)
+        feedback.is_acknowledged = True
+        feedback.is_acknowledged_date = timezone.now()
+        feedback.save()
+    except UserFeedback.DoesNotExist:
+        return APIException
+
