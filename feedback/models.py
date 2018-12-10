@@ -31,8 +31,12 @@ class UserFeedback(models.Model):
     fcm_id = models.CharField(max_length=255, blank=True)
     email_id = models.CharField(max_length=255, blank=True, null=True)
     text = models.TextField()
-    is_feedback_received = models.BooleanField(default=False)
+    is_feedback_received = models.BooleanField(default=False)  # user pressed cancel button
+    is_feedback_shown = models.BooleanField(default=False)
     submited_date = models.DateTimeField(blank=True, null=True)
+    is_acknowledged = models.BooleanField(default=False)
+    is_acknowledged_date = models.DateTimeField(blank=True, null=True)
+    ack_notif_status = models.CharField(max_length=255, null=True, blank=True)
     os = models.CharField(max_length=64)
     os_version = models.CharField(max_length=64)
     created = models.DateTimeField(auto_now_add=True)
