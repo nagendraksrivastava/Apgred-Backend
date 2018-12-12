@@ -11,12 +11,17 @@ from django.utils import timezone
 from rest_framework.response import Response
 from rest_framework import status
 from unnayan.models import Client, AppVersions
+from notification.models import NotificationDetails, NotificationModel
+from notification.views import send_notification_single_device, send_notification_multiple_device
+from notification.views import send_notification_data_message_single_device, \
+    send_notification_data_message_multiple_device
+
+from feedback.models import UserFeedback, FeedbackCategory
 import time
 from django.db.models import Q
 import json
 
 
-# TODO add app token based filteration and version based filteration
 @csrf_exempt
 def total_user(request):
     if request.method != 'GET':
@@ -38,6 +43,7 @@ def total_user(request):
     total_user_count = AppUserInfo.objects.all().filter(app=application).count()
     data = {'total_user': total_user_count}
     return HttpResponse(json.dumps(data))
+
 
 @csrf_exempt
 def get_active_user_count(request):
@@ -78,6 +84,7 @@ def get_active_user_count(request):
 
         }
         return HttpResponse(json.dumps(data))
+
 
 @csrf_exempt
 def last_time_update_triggered(request):
@@ -235,15 +242,45 @@ def get_settings(request):
         return HttpResponse(json.dumps(json_result))
 
 
-def get_app_users(request):
-    if request.method != 'GET':
+def send_notification(request):
+    if request.method != 'POST':
         raise MethodNotAllowed
     token_value = get_authorization_header(request)
-    filter_param = request.GET['users']
-    if Token.objects.get(key=token_value):
-        if filter_param == "all":
-            data = []
-            user_data = AppUserInfo.objects.all
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    app_token = body['app_token']
+    feedback_ids = body['feedback_ids']
+    try:
+        token = Token.objects.get(key=token_value)
+    except Token.DoesNotExist:
+        raise AuthenticationFailed
+    try:
+        app = Application.objects.get(app_token=app_token)
+    except Application.DoesNotExist:
+        json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
+        return HttpResponse(json.dumps(json_result))
+
+    try:
+        notification_details = NotificationDetails.objects.get(app=app)
+    except NotificationDetails.DoesNotExist:
+        json_result = {"status": {"code": 310, "message": " Notification details not found "}}
+        return HttpResponse(json.dumps(json_result))
+
+    data_message = {
+        "title": notification_details.title,
+        "content": notification_details.content
+    }
+    if len(feedback_ids) == 1:
+        user_feedback = UserFeedback.objects.get(id=feedback_ids[0])
+        send_notification_data_message_single_device(user_feedback.fcm_id, data_message)
+    else:
+        fcm_reg_ids = []
+        for feedback_id in feedback_ids:
+            user_feedback = UserFeedback.objects.get(id=feedback_id)
+            fcm_reg_ids.append(user_feedback.fcm_id)
+        send_notification_data_message_multiple_device(fcm_reg_ids, data_message)
+    json_result = {"status": {"code": 200, "message": "  "}}
+    return HttpResponse(json.dumps(json_result))
 
 
 def get_daily_active_user(application):

@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from unnayan.models import Application, AppVersions
+from  notification.models import NotificationDetails, NotificationModel
 
 
 # Create your models here.
@@ -27,6 +28,7 @@ class UserFeedback(models.Model):
     app = models.ForeignKey(Application)
     app_version = models.ForeignKey(AppVersions)
     category = models.ForeignKey(FeedbackCategory)
+    notification = models.ForeignKey(NotificationModel)
     device_id = models.CharField(max_length=255)
     fcm_id = models.CharField(max_length=255, blank=True)
     email_id = models.CharField(max_length=255, blank=True, null=True)

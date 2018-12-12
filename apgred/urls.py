@@ -21,5 +21,6 @@ urlpatterns = [
     url(r'^api/unnayan/v1/', include('unnayan.urls')),
     url(r'^api/dashboard/v1/', include('dashboard.urls')),
     url(r'^api/feedback/v1/', include('feedback.urls')),
+    url(r'^api/notification/v1/', include('notification.urls')),
 
 ]
