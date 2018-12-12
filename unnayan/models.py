@@ -17,8 +17,8 @@ class CompanyProfile(models.Model):
     city = models.CharField(max_length=255, null=True, blank=True)
     country = models.CharField(max_length=255)
     pincode = models.IntegerField(null=True, blank=True)
-    created = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    modified = models.DateTimeField(auto_now=True, null=True, blank=True)
 
     def __unicode__(self):
         return self.company_name
