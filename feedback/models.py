@@ -28,7 +28,6 @@ class UserFeedback(models.Model):
     app = models.ForeignKey(Application)
     app_version = models.ForeignKey(AppVersions)
     category = models.ForeignKey(FeedbackCategory)
-    notification = models.ForeignKey(NotificationModel, blank=True, null=True)
     device_id = models.CharField(max_length=255)
     fcm_id = models.CharField(max_length=255, blank=True)
     email_id = models.CharField(max_length=255, blank=True, null=True)
