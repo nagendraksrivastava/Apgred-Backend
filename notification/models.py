@@ -3,11 +3,13 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.auth.models import User
+from unnayan.models import Application
 
 
 # Create your models here.
 
 class NotificationDetails(models.Model):
+    application = models.ForeignKey(Application)
     title = models.CharField(max_length=120)
     content = models.CharField(max_length=255)
     icon_url = models.CharField(max_length=255, blank=True)
@@ -19,7 +21,6 @@ class NotificationDetails(models.Model):
 
 class NotificationModel(models.Model):
     user = models.OneToOneField(User, blank=False, unique=True)
-    details = models.ForeignKey(NotificationDetails)
     delivered = models.BooleanField(default=False)
     clicked = models.BooleanField(default=False)
     discarded = models.BooleanField(default=False)
