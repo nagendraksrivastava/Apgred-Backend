@@ -9,7 +9,8 @@ from rest_framework.exceptions import MethodNotAllowed, AuthenticationFailed, AP
 from rest_framework.authtoken.models import Token
 from django.utils import timezone
 import json
-import datetime
+from json import dumps
+from datetime import date, datetime
 from models import FeedbackCategory, UserFeedback
 from unnayan.models import AppVersions, Application
 
@@ -191,9 +192,9 @@ def get_feedback_info(feedback, feedback_info):
             "id": feedback.id,
             "os": feedback.os,
             "os_version": feedback.os_version,
-            "submited_date": feedback.submited_date,
+            "submited_date": dumps(feedback.submited_date, default=default),
             "text": feedback.text,
-            "email": feedback.email,
+            "email": feedback.email_id,
             "version_name": feedback.app_version.version_name,
             "version_code": feedback.app_version.version_code,
             "is_enabled": feedback.app_version.is_enabled
@@ -339,3 +340,17 @@ def acknowledge_feedback(request):
     except UserFeedback.DoesNotExist:
         return APIException
 
+
+def default(obj):
+    """Default JSON serializer."""
+    import calendar, datetime
+
+    if isinstance(obj, datetime.datetime):
+        if obj.utcoffset() is not None:
+            obj = obj - obj.utcoffset()
+        millis = int(
+            calendar.timegm(obj.timetuple()) * 1000 +
+            obj.microsecond / 1000
+        )
+        return millis
+    raise TypeError('Not sure how to serialize %s' % (obj,))
