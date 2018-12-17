@@ -18,6 +18,9 @@ class NotificationDetails(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
+    def __unicode__(self):
+        return self.title
+
 
 class NotificationModel(models.Model):
     user = models.OneToOneField(User, blank=False, unique=True)
