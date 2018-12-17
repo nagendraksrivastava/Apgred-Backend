@@ -242,6 +242,7 @@ def get_settings(request):
         return HttpResponse(json.dumps(json_result))
 
 
+@csrf_exempt
 def send_notification(request):
     if request.method != 'POST':
         raise MethodNotAllowed
