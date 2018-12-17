@@ -38,7 +38,7 @@ def get_notification_settings(request):
         json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
         return HttpResponse(json.dumps(json_result))
     try:
-        notification_info = NotificationDetails.objects.get(app=application)
+        notification_info = NotificationDetails.objects.get(application=application)
         json_result = {"status":
             {
                 "code": 200,
@@ -78,7 +78,7 @@ def post_notification_settings(request):
     except Application.DoesNotExist:
         json_result = {"status": {"code": 301, "message": "Client registered but app not registered "}}
         return HttpResponse(json.dumps(json_result))
-    notification_details = NotificationDetails.objects.create(app=application, title=title, content=content)
+    notification_details = NotificationDetails.objects.create(application=application, title=title, content=content)
     notification_details.save()
     json_result = {"status": {"code": 200, "message": "success"}}
     return HttpResponse(json.dumps(json_result))
