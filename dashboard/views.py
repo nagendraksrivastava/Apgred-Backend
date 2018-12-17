@@ -262,7 +262,7 @@ def send_notification(request):
         return HttpResponse(json.dumps(json_result))
 
     try:
-        notification_details = NotificationDetails.objects.get(app=app)
+        notification_details = NotificationDetails.objects.get(application=app)
     except NotificationDetails.DoesNotExist:
         json_result = {"status": {"code": 310, "message": " Notification details not found "}}
         return HttpResponse(json.dumps(json_result))
