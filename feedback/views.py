@@ -132,9 +132,19 @@ def version_filtered_feedback(app, category_param, feedback_info, version_code, 
 
 
 def version_name_filtered_feedback(app, category_param, feedback_info, version_name):
-    app_version = AppVersions.objects.filter(app=app, version_name=version_name)
+    try:
+        category = FeedbackCategory.objects.get(app=app, category_text=category_param)
+    except FeedbackCategory.DoesNotExist:
+        json_result = {"status": {"code": 320,
+                                  "message": "Invalid category "}}
+        return HttpResponse(json.dumps(json_result))
+    try:
+        app_version = AppVersions.objects.filter(app=app, version_name=version_name)
+    except AppVersions.DoesNotExist:
+        json_result = {"status": {"code": 304, "message": " Version does not exist "}}
+        return HttpResponse(json.dumps(json_result))
     for version in app_version:
-        for feedback in UserFeedback.objects.filter(app=app, app_version=version, category=category_param):
+        for feedback in UserFeedback.objects.filter(app=app, app_version=version, category=category):
             feedback_info = get_feedback_info(feedback, feedback_info)
     json_result = {
         "status": {
@@ -147,7 +157,13 @@ def version_name_filtered_feedback(app, category_param, feedback_info, version_n
 
 
 def category_filtered_feedback(app, category_param, feedback_info):
-    for feedback in UserFeedback.objects.filter(app=app, category=category_param):
+    try:
+        category = FeedbackCategory.objects.get(app=app, category_text=category_param)
+    except FeedbackCategory.DoesNotExist:
+        json_result = {"status": {"code": 320,
+                                  "message": "Invalid category "}}
+        return HttpResponse(json.dumps(json_result))
+    for feedback in UserFeedback.objects.filter(app=app, category=category):
         feedback_info = get_feedback_info(feedback, feedback_info)
     json_result = {
         "status": {
@@ -160,8 +176,18 @@ def category_filtered_feedback(app, category_param, feedback_info):
 
 
 def version_code_filtered_feedback(app, category_param, feedback_info, version_code):
-    app_version = AppVersions.objects.get(app=app, version_code=version_code)
-    for feedback in UserFeedback.objects.filter(app=app, app_version=app_version, category=category_param):
+    try:
+        category = FeedbackCategory.objects.get(app=app, category_text=category_param)
+    except FeedbackCategory.DoesNotExist:
+        json_result = {"status": {"code": 320,
+                                  "message": "Invalid category "}}
+        return HttpResponse(json.dumps(json_result))
+    try:
+        app_version = AppVersions.objects.get(app=app, version_code=version_code)
+    except AppVersions.DoesNotExist:
+        json_result = {"status": {"code": 304, "message": " Version does not exist "}}
+        return HttpResponse(json.dumps(json_result))
+    for feedback in UserFeedback.objects.filter(app=app, app_version=app_version, category=category):
         feedback_info = get_feedback_info(feedback, feedback_info)
     json_result = {
         "status": {
