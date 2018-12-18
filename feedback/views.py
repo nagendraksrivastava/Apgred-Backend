@@ -70,9 +70,14 @@ def post_feedback_category(request):
         json_result = {"status": {"code": 301,
                                   "message": "Client registered but app not registered "}}
         return HttpResponse(json.dumps(json_result))
-    category = FeedbackCategory.objects.create(
-        app=app, category_text=category_text, is_enabled=is_enabled)
-
+    try:
+        feedback_category = FeedbackCategory.objects.get(app=app, category_text=category_text)
+        json_result = {"status": {"code": 311,
+                                  "message": " Duplicate category "}}
+        return HttpResponse(json.dumps(json_result))
+    except FeedbackCategory.DoesNotExist:
+        category = FeedbackCategory.objects.create(
+            app=app, category_text=category_text, is_enabled=is_enabled)
     json_result = {"status": {"code": 200,
                               "message": "Category has been created successfully"}}
     return HttpResponse(json.dumps(json_result))
