@@ -40,7 +40,8 @@ def get_feedback_category(request):
             category_info += [
                 {
                     "id": category.id,
-                    "name": category.category_text
+                    "name": category.category_text,
+                    "is_enabled": category.is_enabled
                 }
             ]
     data = {
