@@ -230,6 +230,36 @@ def get_feedback_info(feedback, feedback_info):
 
 
 @csrf_exempt
+def enable_disable_feedback_category(request):
+    if request.method != 'POST':
+        raise MethodNotAllowed
+    token_value = get_authorization_header(request)
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    app_token = body['app_token']
+    is_enable = body['is_enable']
+    category_text = body['category_text']
+    try:
+        token = Token.objects.get(key=token_value)
+    except Token.DoesNotExist:
+        raise AuthenticationFailed
+    try:
+        app = Application.objects.get(app_token=app_token)
+    except Application.DoesNotExist:
+        json_result = {"status": {"code": 301,
+                                  "message": "Client registered but app not registered "}}
+        return HttpResponse(json.dumps(json_result))
+    try:
+        feedback_category = FeedbackCategory.objects.get(app=app, category_text=category_text)
+        feedback_category.is_enabled = is_enable
+        feedback_category.save()
+    except FeedbackCategory.DoesNotExist:
+        json_result = {"status": {"code": 309,
+                                  "message": " Invalid category "}}
+        return HttpResponse(json.dumps(json_result))
+
+
+@csrf_exempt
 def enable_disable_feedback(request):
     if request.method != 'POST':
         raise MethodNotAllowed
