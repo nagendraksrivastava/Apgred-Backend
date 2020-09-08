@@ -190,8 +190,10 @@ def release_history_info(app, app_versions):
         ]
     json_result = {
         "status":
-            {"code": 200,
-             "message": " success "},
+            {
+                "code": 200,
+                "message": "success"
+             },
         "package": app.package_name,
         "app_name": app.app_name,
         "info": info
